@@ -1,0 +1,12 @@
+{
+  "name": "Nemo",
+  "version": "1.0.0",
+  "description": "A bot for employee onboarding",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "botkit": "~0.1.1"
+  }
+}
