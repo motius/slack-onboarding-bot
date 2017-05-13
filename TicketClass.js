@@ -39,12 +39,32 @@ class TicketClass {
      *
      * @param {Number} ticketId - id of the ticket to be updated.
      * @param {String} updateTicket - new ticket data.
+     * @param {Number} updatePriority - ticket priority.
      * @return {Promise}
      */
     static updateTicketById(ticketId, updateTicket, updatePriority) {
         return TicketItem.findOneAndUpdate({
             ticketId: ticketId,
         }, {$set: {ticketData: updateTicket, ticketPriority: updatePriority}});
+    }
+
+    /**
+     * Get ticket.
+     *
+     * @param {Number} ticketId - id of the ticket to be updated.
+     * @return {Promise}
+     */
+    static getTicket(ticketId) {
+        return TicketItem.findOne({ticketId: ticketId});
+    }
+
+    /**
+     * Get all given ticket.
+     *
+     * @return {Promise}
+     */
+    static getTickets() {
+        return TicketItem.find();
     }
 
     /**
