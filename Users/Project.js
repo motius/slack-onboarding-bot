@@ -47,6 +47,16 @@ class Project extends Member {
         //TODO
     }
 
+    /**
+     * Adds member for onboarding.
+     *
+     * @param {String} username - Username of the member to add to the database.
+     * @return {Promise}
+     */
+    addMember(username) {
+        //TODO
+    }
+
 }
 
 module.exports = Project;

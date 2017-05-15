@@ -51,6 +51,16 @@ class Member {
         throw "Abstract method getMemberProgress not implemented";
     }
 
+    /**
+     * Adds member for onboarding.
+     *
+     * @param {String} username - Username of the member to add to the database.
+     * @return {Promise}
+     */
+    addMember(username) {
+        throw "Abstract method getMemberProgress not implemented";
+    }
+
 
 }
 

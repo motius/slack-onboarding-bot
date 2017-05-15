@@ -64,7 +64,7 @@ class TicketClass {
      * @return {Promise}
      */
     static getTickets() {
-        return TicketItem.find();
+        return TicketItem.find({});
     }
 
     /**
