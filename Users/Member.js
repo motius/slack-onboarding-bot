@@ -1,5 +1,7 @@
 'use strict';
 
+let member;
+
 /**
  * @class
  */
@@ -10,6 +12,32 @@ class Member {
      */
     constructor() {
     }
+
+    /**
+     * Creates the mongoose schemes and models for the mongo board.
+     *
+     * @param {mongoose} mongoose - Mongoose instance.
+     * @param db - The database connection
+     */
+    static createDBSchemes(mongoose, db) {
+        let mongoSchema = mongoose.Schema({
+            name: String,
+            username: {
+                type: String,
+                unique: true
+            },
+            emailAddress: {
+                type: String,
+                unique: true
+            },
+            type: String
+        });
+
+        mongoSchema.query.byUsername = function (username) {
+            return this.findOne({username: username});
+        };
+        member = db.model('User', mongoSchema);
+    };
 
     /**
      * Returns the boardsize.
@@ -27,7 +55,7 @@ class Member {
      * @return {Promise}
      */
     getMemberType(username) {
-        throw "Abstract method getMemberType not implemented";
+        return(member.findOne({username: username}, {type: 1}))
     }
 
     /**
@@ -57,7 +85,7 @@ class Member {
      * @param {String} username - Username of the member to add to the database.
      * @return {Promise}
      */
-    addMember(username) {
+    addMember(name, username, emailAdress) {
         throw "Abstract method getMemberProgress not implemented";
     }
 

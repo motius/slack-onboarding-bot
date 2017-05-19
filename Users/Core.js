@@ -17,16 +17,6 @@ class Core extends Member {
     }
 
     /**
-     * Returns the type of the Member.
-     *
-     * @param {String} username - Username of the member to get the type.
-     * @return {Promise}
-     */
-    getMemberType(username) {
-        //TODO
-    }
-
-    /**
      * Returns the progress of the Member.
      *
      * @param {String} username - Username of the member to get the progress.
@@ -52,10 +42,9 @@ class Core extends Member {
      * @param {String} username - Username of the member to add to the database.
      * @return {Promise}
      */
-    addMember(username) {
-        //TODO
+    addMember(name, username, emailAdress) {
+        member.create({name: name, username: username, emailAddress: emailAdress, type: "Core"})
     }
-
 }
 
 module.exports = Core;

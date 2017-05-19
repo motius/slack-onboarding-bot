@@ -1,8 +1,6 @@
 'use strict';
 const Member = require("./Member");
 
-let projectMember;
-
 /**
  * @class
  * @augments {Member}
@@ -14,17 +12,6 @@ class Project extends Member {
      */
     constructor() {
         super();
-    }
-
-
-    /**
-     * Returns the type of the Member.
-     *
-     * @param {String} username - Username of the member to get the type.
-     * @return {Promise}
-     */
-    getMemberType(username) {
-        //TODO
     }
 
     /**
@@ -53,8 +40,8 @@ class Project extends Member {
      * @param {String} username - Username of the member to add to the database.
      * @return {Promise}
      */
-    addMember(username) {
-        //TODO
+    addMember(name, username, emailAdress) {
+        member.create({name: name, username: username, emailAddress: emailAdress, type: "Project"})
     }
 
 }

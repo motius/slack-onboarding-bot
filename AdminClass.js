@@ -1,7 +1,7 @@
 'use strict';
 
 
-let Admin;
+let admin;
 
 /**
  * @class
@@ -32,7 +32,7 @@ class AdminClass {
         mongoSchema.query.byUsername = function (username) {
             return this.findOne({username: username});
         };
-        Admin = db.model('User', mongoSchema);
+        admin = db.model('Admin', mongoSchema);
     };
 
     /**
@@ -43,7 +43,7 @@ class AdminClass {
      * @return {Promise}
      */
     static addAdmin(name, username) {
-        return Admin.create({name: name, username: username});
+        return admin.create({name: name, username: username});
     }
 
     /**
@@ -53,7 +53,7 @@ class AdminClass {
      * @return {Promise}
      */
     static removeAdmin(username) {
-        return Admin.remove({username: username}, function (err) {
+        return admin.remove({username: username}, function (err) {
             if (err) console.log("Remove Admin ERROR ", err);
             // removed!
         });
@@ -65,7 +65,7 @@ class AdminClass {
      * @return {Promise}
      */
     static removeUsers() {
-        return Admin.remove({}, function (err) {
+        return admin.remove({}, function (err) {
             if (err) console.log("Remove Admins ERROR ", err);
             // removed!
         });
