@@ -7,7 +7,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "botkit": "^0.1.2",
+    "botkit": "^0.5.4",
     "mongodb": "^2.2.26",
     "mongoose": "^4.9.8"
   }
