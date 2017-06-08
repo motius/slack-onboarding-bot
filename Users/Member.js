@@ -21,6 +21,10 @@ class Member {
      */
     static createDBSchemes(mongoose, db) {
         let mongoSchema = mongoose.Schema({
+            id: {
+                type: String,
+                unique: true
+            },
             name: String,
             username: {
                 type: String,
@@ -55,7 +59,7 @@ class Member {
      * @return {Promise}
      */
     getMemberType(username) {
-        return(member.findOne({username: username}, {type: 1}))
+        return (member.findOne({username: username}, {type: 1}))
     }
 
     /**
@@ -82,11 +86,14 @@ class Member {
     /**
      * Adds member for onboarding.
      *
+     * @param {String} name - Name of the member to add to the database.
      * @param {String} username - Username of the member to add to the database.
+     * @param {String} emailAddress - emailAddress of the member to add to the database.
+     * @param {String} type - type of the member to add to the database.
      * @return {Promise}
      */
-    addMember(name, username, emailAdress) {
-        throw "Abstract method getMemberProgress not implemented";
+    addMember(name, username, emailAddress, type) {
+        return member.create({name: name, username: username, emailAddress: emailAddress, type: type});
     }
 
 

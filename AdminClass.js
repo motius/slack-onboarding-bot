@@ -60,11 +60,11 @@ class AdminClass {
     }
 
     /**
-     * Removes all users.
+     * Removes all admins.
      *
      * @return {Promise}
      */
-    static removeUsers() {
+    static removeAdmins() {
         return admin.remove({}, function (err) {
             if (err) console.log("Remove Admins ERROR ", err);
             // removed!

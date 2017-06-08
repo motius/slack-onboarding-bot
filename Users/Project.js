@@ -37,11 +37,13 @@ class Project extends Member {
     /**
      * Adds member for onboarding.
      *
+     * @param {String} name - Name of the member to add to the database.
      * @param {String} username - Username of the member to add to the database.
+     * @param {String} emailAddress - emailAddress of the member to add to the database.
      * @return {Promise}
      */
-    addMember(name, username, emailAdress) {
-        member.create({name: name, username: username, emailAddress: emailAdress, type: "Project"})
+    addMemberForOnboarding(name, username, emailAddress) {
+        super.addMember(name, username, emailAddress, "PROJECT");
     }
 
 }
