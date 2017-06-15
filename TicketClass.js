@@ -35,6 +35,19 @@ class TicketClass {
     };
 
     /**
+     * Add the given ticket.
+     *
+     * @param {String} ticket - new ticket data.
+     * @param {Number} priority - ticket priority.
+     * @return {Promise}
+     */
+    static addTicket(ticket, priority) {
+        return TicketItem.findOneAndUpdate({
+            ticketId: ticketId,
+        }, {$set: {ticketData: updateTicket, ticketPriority: updatePriority}});
+    }
+
+    /**
      * Updates the given ticket.
      *
      * @param {Number} ticketId - id of the ticket to be updated.
