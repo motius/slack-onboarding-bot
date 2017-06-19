@@ -9,7 +9,9 @@ module.exports.userBot = (controller) => {
     controller.hears(['add'], ['direct_message'], function (bot, message) {
         // console.log(bot)
         console.log(message);
-        bot.startConversation();
+        bot.startConversation(message, function (err, convo) {
+
+        });
         // bot.api.groups.list({}, function (err, response) {
         //     if (err) {
         //         console.log(err)

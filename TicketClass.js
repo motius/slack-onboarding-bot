@@ -2,6 +2,7 @@
 
 
 let TicketItem;
+const CONSTANTS = require('./Constants');
 
 /**
  * @class
@@ -42,9 +43,8 @@ class TicketClass {
      * @return {Promise}
      */
     static addTicket(ticket, priority) {
-        return TicketItem.findOneAndUpdate({
-            ticketId: ticketId,
-        }, {$set: {ticketData: updateTicket, ticketPriority: updatePriority}});
+        let ticketId = Math.random() * (CONSTANTS.NUMBERS.maxTicketID - CONSTANTS.NUMBERS.minTicketID) + CONSTANTS.NUMBERS.minTicketID;
+        return TicketItem.create({ticketId: ticketId, ticketData: ticket, ticketPriority: priority});
     }
 
     /**
