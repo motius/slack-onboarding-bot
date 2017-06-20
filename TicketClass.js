@@ -43,7 +43,7 @@ class TicketClass {
      * @return {Promise}
      */
     static addTicket(ticket, priority) {
-        let ticketId = Math.random() * (CONSTANTS.NUMBERS.maxTicketID - CONSTANTS.NUMBERS.minTicketID) + CONSTANTS.NUMBERS.minTicketID;
+        let ticketId = Math.round(Math.random() * (CONSTANTS.NUMBERS.maxTicketID - CONSTANTS.NUMBERS.minTicketID) + CONSTANTS.NUMBERS.minTicketID);
         return TicketItem.create({ticketId: ticketId, ticketData: ticket, ticketPriority: priority});
     }
 
