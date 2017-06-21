@@ -44,15 +44,6 @@ class Member {
     };
 
     /**
-     * Returns the boardsize.
-     *
-     * @return {number}
-     */
-    static get BOARDSIZE() {
-        return BOARDSIZE;
-    }
-
-    /**
      * Returns the type of the Member.
      *
      * @param {String} username - Username of the member to get the type.
