@@ -11,10 +11,9 @@ module.exports.userBot = (controller) => {
     });
 
     controller.hears(['add_ticket'], ['direct_message'], function (bot, message) {
-        // console.log(bot)
-        bot.startConversation(message, function (err, convo) {
-            if (Utils.checkUserPermission(bot, message.user)) {
-                var ticket = message.text.substr(message.text.indexOf(":") + 1)
+        Utils.checkUserPermission(bot, message.user).then(permission => {
+            bot.startConversation(message, function (err, convo) {
+                let ticket = message.text.substr(message.text.indexOf(":") + 1)
                 convo.ask(CONSTANTS.RESPONSES.TICKET_PRIORITIES + "\nHint:  " + CONSTANTS.RESPONSES.TICKET_PRIORITIES_OPTION, [
                     {
                         pattern: '1',
@@ -59,21 +58,50 @@ module.exports.userBot = (controller) => {
                         }
                     }
                 ], {}, 'default');
-            }
+            }).catch((permission) => {
+                bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+            });
 
         });
-
-        // bot.reply(message, 'Hello.')
     });
 
     controller.hears(['prepare_member'], ['direct_message'], function (bot, message) {
-        if (Utils.checkUserPermission(bot, message.user)) {
+        Utils.checkUserPermission(bot, message.user).then(permission => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
-            members.forEach(function (member) {
-                //TODO: relate members with tickets
-            });
-        }
-        bot.reply(message, 'Initialized member collection')
+            bot.startConversation(message, function (err, convo) {
+                convo.ask(CONSTANTS.RESPONSES.MEMBER_TYPE + "\nHint:  " + CONSTANTS.RESPONSES.HINT_MEMBER, [
+                    {
+                        pattern: 'Core',
+                        callback: function (response, convo) {
+                            convo.say('OK you are done!');
+                            convo.next();
+                        }
+                    },
+                    {
+                        pattern: 'Project',
+                        callback: function (response, convo) {
+                            convo.say('OK you are done!');
+                            convo.next();
+
+                        }
+                    },
+                    {
+                        default: true,
+                        callback: function (response, convo) {
+                            // just repeat the question
+                            convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
+                            convo.repeat();
+                            convo.next();
+                        }
+                    }
+                ], {}, 'default');
+
+            })
+        }).catch((permission) => {
+            bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+        });
+
+
     });
 
     controller.hears(['initialize tasks'], ['direct_message'], function (bot, message) {
