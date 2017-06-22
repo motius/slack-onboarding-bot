@@ -1,6 +1,8 @@
 const Ticket = require('./TicketClass');
 const CONSTANTS = require('./Constants');
 const Utils = require('./Utils')
+const CoreMember = require('./Users/Core');
+const ProjectMember = require ('./Users/Project');
 
 module.exports.userBot = (controller) => {
     controller.on('bot_channel_join', function (bot, message) {
@@ -86,11 +88,18 @@ module.exports.userBot = (controller) => {
     controller.hears(['prepare_member'], ['direct_message'], function (bot, message) {
         Utils.checkUserPermission(bot, message.user).then(permission => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
+
             bot.startConversation(message, function (err, convo) {
                 convo.ask(CONSTANTS.RESPONSES.MEMBER_TYPE + "\nHint:  " + CONSTANTS.RESPONSES.HINT_MEMBER, [
                     {
                         pattern: 'Core',
                         callback: function (response, convo) {
+                            // Extract user information from slack and add new member
+                            bot.api.users.info({user: members[1]}, (error, response) => {
+                                let {username, real_name} = response.user;
+                                CoreMember.addMemberForOnboarding(real_name, username, "not.filled@yet.duh");
+                            })
+
                             convo.say('OK you are done!');
                             convo.next();
                         }
@@ -98,6 +107,12 @@ module.exports.userBot = (controller) => {
                     {
                         pattern: 'Project',
                         callback: function (response, convo) {
+                            // Extract user information from slack and add new member
+                            bot.api.users.info({user: members[1]}, (error, response) => {
+                                let {username, real_name} = response.user;
+                                ProjectMember.addMemberForOnboarding(real_name, username, "not.filled@yet.duh");
+                            })
+
                             convo.say('OK you are done!');
                             convo.next();
 
@@ -125,8 +140,4 @@ module.exports.userBot = (controller) => {
     controller.hears(['initialize tasks'], ['direct_message'], function (bot, message) {
         bot.reply(message, 'Initialized task collection')
     });
-
-    controller.hears(['add'], ['direct_message'], function (bot, message) {
-        bot.reply(message, 'Added member')
-    })
 };

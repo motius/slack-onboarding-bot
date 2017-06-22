@@ -83,7 +83,7 @@ class Member {
      * @param {String} type - type of the member to add to the database.
      * @return {Promise}
      */
-    addMember(name, username, emailAddress, type) {
+    static addMember(name, username, emailAddress, type) {
         return member.create({name: name, username: username, emailAddress: emailAddress, type: type});
     }
 

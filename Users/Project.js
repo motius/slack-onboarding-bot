@@ -1,6 +1,8 @@
 'use strict';
 const Member = require("./Member");
 
+let projectMember;
+
 /**
  * @class
  * @augments {Member}
@@ -42,7 +44,7 @@ class Project extends Member {
      * @param {String} emailAddress - emailAddress of the member to add to the database.
      * @return {Promise}
      */
-    addMemberForOnboarding(name, username, emailAddress) {
+    static addMemberForOnboarding(name, username, emailAddress) {
         super.addMember(name, username, emailAddress, "PROJECT");
     }
 
