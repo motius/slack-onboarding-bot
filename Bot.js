@@ -12,56 +12,74 @@ module.exports.userBot = (controller) => {
 
     controller.hears(['add_ticket'], ['direct_message'], function (bot, message) {
         Utils.checkUserPermission(bot, message.user).then(permission => {
-            bot.startConversation(message, function (err, convo) {
-                let ticket = message.text.substr(message.text.indexOf(":") + 1)
-                convo.ask(CONSTANTS.RESPONSES.TICKET_PRIORITIES + "\nHint:  " + CONSTANTS.RESPONSES.TICKET_PRIORITIES_OPTION, [
-                    {
-                        pattern: '1',
-                        callback: function (response, convo) {
-                            Ticket.addTicket(ticket, response.text);
-                            convo.say('OK you are done!');
-                            convo.next();
-                        }
-                    },
-                    {
-                        pattern: '2',
-                        callback: function (response, convo) {
-                            Ticket.addTicket(ticket, response.text);
-                            convo.say('OK you are done!');
-                            convo.next();
 
-                        }
-                    },
-                    {
-                        pattern: '3',
-                        callback: function (response, convo) {
-                            Ticket.addTicket(ticket, response.text);
-                            convo.say('OK you are done!');
-                            convo.next();
-                        }
-                    },
-                    {
-                        pattern: '4',
-                        callback: function (response, convo) {
-                            Ticket.addTicket(ticket, response.text);
-                            convo.say('OK you are done!');
-                            convo.next();
-                        }
-                    },
-                    {
-                        default: true,
-                        callback: function (response, convo) {
-                            // just repeat the question
-                            convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
-                            convo.repeat();
-                            convo.next();
-                        }
-                    }
-                ], {}, 'default');
-            }).catch((permission) => {
-                bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
-            });
+            // Check for correct Syntax
+            let ticket = "";
 
+            if(message.text.indexOf(":") != -1) {
+                ticket = message.text.substr(message.text.indexOf(":") + 1);
+            }
+            else
+            {
+                bot.reply(message, CONSTANTS.RESPONSES.TICKET_WRONG_SYNTAX);
+                return;
+            }
+
+            // Ticket should not be empty!
+            if(ticket === "")
+            {
+                bot.reply(message, CONSTANTS.RESPONSES.TICKET_EMPTY);
+            }
+            else {
+                bot.startConversation(message, function (err, convo) {
+                    convo.ask(CONSTANTS.RESPONSES.TICKET_PRIORITIES + "\nHint:  " + CONSTANTS.RESPONSES.TICKET_PRIORITIES_OPTION, [
+                        {
+                            pattern: '1',
+                            callback: function (response, convo) {
+                                Ticket.addTicket(ticket, response.text);
+                                convo.say('OK you are done!');
+                                convo.next();
+                            }
+                        },
+                        {
+                            pattern: '2',
+                            callback: function (response, convo) {
+                                Ticket.addTicket(ticket, response.text);
+                                convo.say('OK you are done!');
+                                convo.next();
+
+                            }
+                        },
+                        {
+                            pattern: '3',
+                            callback: function (response, convo) {
+                                Ticket.addTicket(ticket, response.text);
+                                convo.say('OK you are done!');
+                                convo.next();
+                            }
+                        },
+                        {
+                            pattern: '4',
+                            callback: function (response, convo) {
+                                Ticket.addTicket(ticket, response.text);
+                                convo.say('OK you are done!');
+                                convo.next();
+                            }
+                        },
+                        {
+                            default: true,
+                            callback: function (response, convo) {
+                                // just repeat the question
+                                convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
+                                convo.repeat();
+                                convo.next();
+                            }
+                        }
+                    ], {}, 'default');
+                }).catch((permission) => {
+                    bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+                });
+            }
         });
     });
 

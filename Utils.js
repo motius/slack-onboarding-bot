@@ -2,7 +2,8 @@ function checkUser(bot, user) {
     return new Promise(function (resolve, reject) {
         bot.api.groups.list({}, function (err, response) {
             if (err) {
-                console.log(err)
+                console.log(err);
+                reject(false);
             } else {
                 response.groups.forEach(function (group) {
                     group.members.forEach(function (member) {
