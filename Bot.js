@@ -1,8 +1,9 @@
 const Ticket = require('./TicketClass');
 const CONSTANTS = require('./Constants');
-const Utils = require('./Utils')
+const Utils = require('./Utils');
+const Conversations = require('./Conversations');
 const CoreMember = require('./Users/Core');
-const ProjectMember = require ('./Users/Project');
+const ProjectMember = require('./Users/Project');
 
 module.exports.userBot = (controller) => {
     controller.on('bot_channel_join', function (bot, message) {
@@ -18,18 +19,16 @@ module.exports.userBot = (controller) => {
             // Check for correct Syntax
             let ticket = "";
 
-            if(message.text.indexOf(":") != -1) {
+            if (message.text.indexOf(":") != -1) {
                 ticket = message.text.substr(message.text.indexOf(":") + 1);
             }
-            else
-            {
+            else {
                 bot.reply(message, CONSTANTS.RESPONSES.TICKET_WRONG_SYNTAX);
                 return;
             }
 
             // Ticket should not be empty!
-            if(ticket === "")
-            {
+            if (ticket === "") {
                 bot.reply(message, CONSTANTS.RESPONSES.TICKET_EMPTY);
             }
             else {
@@ -78,10 +77,10 @@ module.exports.userBot = (controller) => {
                             }
                         }
                     ], {}, 'default');
-                }).catch((permission) => {
-                    bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
-                });
+                })
             }
+        }).catch((permission) => {
+            bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
         });
     });
 
@@ -97,11 +96,17 @@ module.exports.userBot = (controller) => {
                             // Extract user information from slack and add new member
                             bot.api.users.info({user: members[1]}, (error, response) => {
                                 let {username, real_name} = response.user;
-                                CoreMember.addMemberForOnboarding(real_name, username, "not.filled@yet.duh");
-                            })
+                                Ticket.getTickets().then((tickets) => {
+                                    CoreMember.addMemberForOnboarding(real_name, username, "not.filled@yet.duh", tickets);
+                                    convo.say('OK you are done!');
+                                    convo.next();
+                                }).catch((err) => {
+                                    console.log(err);
+                                    convo.say(CONSTANTS.RESPONSES.ERROR);
+                                    convo.next();
+                                });
+                            });
 
-                            convo.say('OK you are done!');
-                            convo.next();
                         }
                     },
                     {
@@ -110,12 +115,16 @@ module.exports.userBot = (controller) => {
                             // Extract user information from slack and add new member
                             bot.api.users.info({user: members[1]}, (error, response) => {
                                 let {username, real_name} = response.user;
-                                ProjectMember.addMemberForOnboarding(real_name, username, "not.filled@yet.duh");
-                            })
-
-                            convo.say('OK you are done!');
-                            convo.next();
-
+                                Ticket.getTickets().then((tickets) => {
+                                    ProjectMember.addMemberForOnboarding(real_name, username, "not.filled@yet.duh", tickets);
+                                    convo.say('OK you are done!');
+                                    convo.next();
+                                }).catch((err) => {
+                                    console.log(err);
+                                    convo.say(CONSTANTS.RESPONSES.ERROR);
+                                    convo.next();
+                                });
+                            });
                         }
                     },
                     {

@@ -23,7 +23,7 @@ class Project extends Member {
      * @return {Promise}
      */
     getMemberProgress(username) {
-        //TODO
+        super.getMemberProgress(username);
     }
 
     /**
@@ -32,7 +32,7 @@ class Project extends Member {
      * @param {String} username - Username of the member to get the progress.
      * @return {Promise}
      */
-    prepareMember(username) {
+    startMemberOnboarding(username) {
         //TODO
     }
 
@@ -42,10 +42,11 @@ class Project extends Member {
      * @param {String} name - Name of the member to add to the database.
      * @param {String} username - Username of the member to add to the database.
      * @param {String} emailAddress - emailAddress of the member to add to the database.
+     * @param {Array} tickets - tickets to be completed by the member.
      * @return {Promise}
      */
-    static addMemberForOnboarding(name, username, emailAddress) {
-        super.addMember(name, username, emailAddress, "PROJECT");
+    static addMemberForOnboarding(name, username, emailAddress, tickets) {
+        super.addMember(name, username, emailAddress, "PROJECT", tickets);
     }
 
 }
