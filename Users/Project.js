@@ -39,14 +39,14 @@ class Project extends Member {
     /**
      * Adds member for onboarding.
      *
+     * @param {Number} id - ID of the member to add to the database.
      * @param {String} name - Name of the member to add to the database.
      * @param {String} username - Username of the member to add to the database.
      * @param {String} emailAddress - emailAddress of the member to add to the database.
-     * @param {Array} tickets - tickets to be completed by the member.
      * @return {Promise}
      */
-    static addMemberForOnboarding(name, username, emailAddress, tickets) {
-        super.addMember(name, username, emailAddress, "PROJECT", tickets);
+    static addMemberForOnboarding(id, name, username, emailAddress) {
+        super.addMember(name, username, emailAddress, "PROJECT");
     }
 
 }

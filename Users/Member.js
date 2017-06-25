@@ -21,7 +21,7 @@ class Member {
      */
     static createDBSchemes(mongoose, db) {
         let mongoSchema = mongoose.Schema({
-            id: {
+            userId: {
                 type: String,
                 unique: true
             },
@@ -64,7 +64,7 @@ class Member {
      * @return {Promise}
      */
     getMemberProgress(username) {
-        return (member.findOne({username: username}, tickets));
+        return (member.findOne({username: username}, 'tickets'));
     }
 
 
@@ -81,31 +81,24 @@ class Member {
     /**
      * Adds member for onboarding.
      *
+     * @param {Number} id - ID of the member to add to the database.
      * @param {String} name - Name of the member to add to the database.
      * @param {String} username - Username of the member to add to the database.
      * @param {String} emailAddress - emailAddress of the member to add to the database.
      * @param {String} type - type of the member to add to the database.
-     * @param {Array} tickets - tickets to be completed by the member.
      * @return {Promise}
      */
-    static addMember(name, username, emailAddress, type, tickets) {
-        tickets = tickets.map((ticket) => {
-            let t = {};
-            t.status = false;
-            t._id = ticket._id;
-            return t;
-        });
-        
+    static addMember(id, name, username, emailAddress, type) {
+
         return member.create({
+            userId: id,
             name: name,
             username: username,
             emailAddress: emailAddress,
             type: type,
-            tickets: tickets
+            tickets: []
         });
     }
-
-
 }
 
 module.exports = Member;

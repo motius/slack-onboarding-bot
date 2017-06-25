@@ -11,6 +11,19 @@ module.exports.userBot = (controller) => {
     });
 
     controller.hears(['hi'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
+        var reply_with_attachments = {
+            'text': 'This is a pre-text',
+            'attachments': [
+                {
+                    'fallback': 'To be useful, I need you to invite me in a channel.',
+                    'title': 'How can I help you?',
+                    'text': 'To be useful, I need you to invite me in a channel ',
+                    'color': '#7CD197'
+                }
+            ],
+            'icon_url': 'http://lorempixel.com/48/48'
+        };
+        bot.reply(message, reply_with_attachments);
     });
 
     controller.hears(['add_ticket'], ['direct_message'], function (bot, message) {
@@ -85,9 +98,8 @@ module.exports.userBot = (controller) => {
     });
 
     controller.hears(['prepare_member'], ['direct_message'], function (bot, message) {
-        Utils.checkUserPermission(bot, message.user).then(permission => {
+        Utils.checkUserPermission(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
-
             bot.startConversation(message, function (err, convo) {
                 convo.ask(CONSTANTS.RESPONSES.MEMBER_TYPE + "\nHint:  " + CONSTANTS.RESPONSES.HINT_MEMBER, [
                     {
@@ -95,16 +107,10 @@ module.exports.userBot = (controller) => {
                         callback: function (response, convo) {
                             // Extract user information from slack and add new member
                             bot.api.users.info({user: members[1]}, (error, response) => {
-                                let {username, real_name} = response.user;
-                                Ticket.getTickets().then((tickets) => {
-                                    CoreMember.addMemberForOnboarding(real_name, username, "not.filled@yet.duh", tickets);
-                                    convo.say('OK you are done!');
-                                    convo.next();
-                                }).catch((err) => {
-                                    console.log(err);
-                                    convo.say(CONSTANTS.RESPONSES.ERROR);
-                                    convo.next();
-                                });
+                                let {id, name, real_name, profile} = response.user;
+                                CoreMember.addMemberForOnboarding(id, real_name, name, profile.email);
+                                convo.say('OK you are done!');
+                                convo.next();
                             });
 
                         }
@@ -114,16 +120,10 @@ module.exports.userBot = (controller) => {
                         callback: function (response, convo) {
                             // Extract user information from slack and add new member
                             bot.api.users.info({user: members[1]}, (error, response) => {
-                                let {username, real_name} = response.user;
-                                Ticket.getTickets().then((tickets) => {
-                                    ProjectMember.addMemberForOnboarding(real_name, username, "not.filled@yet.duh", tickets);
-                                    convo.say('OK you are done!');
-                                    convo.next();
-                                }).catch((err) => {
-                                    console.log(err);
-                                    convo.say(CONSTANTS.RESPONSES.ERROR);
-                                    convo.next();
-                                });
+                                let {id, name, real_name, profile} = response.user;
+                                ProjectMember.addMemberForOnboarding(id, real_name, name, profile.email);
+                                convo.say('OK you are done!');
+                                convo.next();
                             });
                         }
                     },
@@ -146,7 +146,26 @@ module.exports.userBot = (controller) => {
 
     });
 
-    controller.hears(['initialize tasks'], ['direct_message'], function (bot, message) {
-        bot.reply(message, 'Initialized task collection')
+    controller.hears(['list_tickets'], ['direct_message'], function (bot, message) {
+        Utils.checkUserPermission(bot, message.user).then((permission) => {
+            Ticket.getTickets().then((res) => {
+                let tickets = {
+                    'text': CONSTANTS.RESPONSES.TICKET_LIST,
+                    'attachments': []
+                };
+                res.forEach((t) => {
+                    let ticket = {
+                        'title': t.ticketData + ' ( ID: ' + t.ticketId + ' )',
+                        'color': '#117ef9',
+                    };
+                    tickets.attachments.push(ticket);
+                });
+                bot.reply(message, tickets);
+            }).catch((err) => {
+                console.log(err);
+            });
+        }).catch((err) => {
+            bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+        });
     });
 };
