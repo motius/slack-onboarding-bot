@@ -2,6 +2,7 @@ const Ticket = require('./TicketClass');
 const CONSTANTS = require('./Constants');
 const Utils = require('./Utils');
 const Conversations = require('./Conversations');
+const SocketServer = require('./Socket');
 const CoreMember = require('./Users/Core');
 const ProjectMember = require('./Users/Project');
 
@@ -24,6 +25,12 @@ module.exports.userBot = (controller) => {
             'icon_url': 'http://lorempixel.com/48/48'
         };
         bot.reply(message, reply_with_attachments);
+    });
+
+    controller.hears(['robot'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
+
+        let event = message.text.substr(message.text.indexOf(":") + 1);
+        SocketServer.emitEvent(event);
     });
 
     controller.hears(['add_ticket'], ['direct_message'], function (bot, message) {
@@ -50,7 +57,11 @@ module.exports.userBot = (controller) => {
                         {
                             pattern: '1',
                             callback: function (response, convo) {
-                                Ticket.addTicket(ticket, response.text);
+                                Ticket.addTicket(ticket, response.text).then((res) => {
+                                    console.log(res)
+                                }).catch((err) => {
+                                    console.log(err)
+                                });
                                 convo.say('OK you are done!');
                                 convo.next();
                             }
@@ -122,6 +133,55 @@ module.exports.userBot = (controller) => {
                             bot.api.users.info({user: members[1]}, (error, response) => {
                                 let {id, name, real_name, profile} = response.user;
                                 ProjectMember.addMemberForOnboarding(id, real_name, name, profile.email);
+                                convo.say('OK you are done!');
+                                convo.next();
+                            });
+                        }
+                    },
+                    {
+                        default: true,
+                        callback: function (response, convo) {
+                            // just repeat the question
+                            convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
+                            convo.repeat();
+                            convo.next();
+                        }
+                    }
+                ], {}, 'default');
+
+            })
+        }).catch((permission) => {
+            bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+        });
+
+
+    });
+
+    controller.hears(['edit_member'], ['direct_message'], function (bot, message) {
+        Utils.checkUserPermission(bot, message.user).then((permission) => {
+            let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
+            bot.startConversation(message, function (err, convo) {
+                convo.ask(CONSTANTS.RESPONSES.MEMBER_TYPE + "\nHint:  " + CONSTANTS.RESPONSES.HINT_MEMBER, [
+                    {
+                        pattern: 'Core',
+                        callback: function (response, convo) {
+                            // Extract user information from slack and add new member
+                            bot.api.users.info({user: members[1]}, (error, response) => {
+                                let {id, name, real_name, profile} = response.user;
+                                CoreMember.editMember(id, profile.email, 'Core');
+                                convo.say('OK you are done!');
+                                convo.next();
+                            });
+
+                        }
+                    },
+                    {
+                        pattern: 'Project',
+                        callback: function (response, convo) {
+                            // Extract user information from slack and add new member
+                            bot.api.users.info({user: members[1]}, (error, response) => {
+                                let {id, name, real_name, profile} = response.user;
+                                ProjectMember.editMember(id, profile.email, 'Core');
                                 convo.say('OK you are done!');
                                 convo.next();
                             });

@@ -41,8 +41,8 @@ class Member {
             }]
         });
 
-        mongoSchema.query.byUsername = function (username) {
-            return this.findOne({username: username});
+        mongoSchema.query.byUserId = function (userId) {
+            return this.findOne({userId: userId});
         };
         member = db.model('User', mongoSchema);
     };
@@ -50,31 +50,45 @@ class Member {
     /**
      * Returns the type of the Member.
      *
-     * @param {String} username - Username of the member to get the type.
+     * @param {String} userId - userId of the member to get the type.
      * @return {Promise}
      */
-    getMemberType(username) {
-        return member.findOne({username: username}, {type: 1});
+    getMemberType(userId) {
+        return member.byUserId(userId);
     }
 
     /**
      * Returns the progress of the Member.
      *
-     * @param {String} username - Username of the member to get the progress.
+     * @param {String} userId - userId of the member to get the progress.
      * @return {Promise}
      */
-    getMemberProgress(username) {
-        return (member.findOne({username: username}, 'tickets'));
+    getMemberProgress(userId) {
+        return (member.findOne({userId: userId}, 'tickets'));
+    }
+
+    /**
+     * Setups member for onboarding.
+     *
+     * @param {String} userId - Username of the member to get the progress.
+     * @param {String} emailAddress - emailAddress of the member to add to the database.
+     * @param {String} type - type of the member to add to the database.
+     * @return {Promise}
+     */
+    editMember(userId, emailAddress, type) {
+        return member.findOneAndUpdate({
+            userId: userId,
+        }, {$set: {emailAddress: emailAddress, type: type}});
     }
 
 
     /**
      * Setups member for onboarding.
      *
-     * @param {String} username - Username of the member to get the progress.
+     * @param {String} userId - userId of the member to get the progress.
      * @return {Promise}
      */
-    startMemberOnboarding(username) {
+    startMemberOnboarding(userId) {
         throw "Abstract method getMemberProgress not implemented";
     }
 

@@ -1,5 +1,6 @@
 'use strict';
 const Member = require("./Member");
+const CONSTANTS = require("../Constants");
 
 let projectMember;
 
@@ -19,20 +20,25 @@ class Project extends Member {
     /**
      * Returns the progress of the Member.
      *
-     * @param {String} username - Username of the member to get the progress.
+     * @param {String} userId - userId of the member to get the progress.
      * @return {Promise}
      */
-    getMemberProgress(username) {
-        super.getMemberProgress(username);
+    getMemberProgress(userId) {
+        super.getMemberProgress(userId)
+            .then((res) => {
+                console.log(res)
+            }).catch((err) => {
+            console.log(err)
+        });
     }
 
     /**
      * Setups member for onboarding.
      *
-     * @param {String} username - Username of the member to get the progress.
+     * @param {String} userId - userId of the member to get the progress.
      * @return {Promise}
      */
-    startMemberOnboarding(username) {
+    startMemberOnboarding(userId) {
         //TODO
     }
 
@@ -46,7 +52,29 @@ class Project extends Member {
      * @return {Promise}
      */
     static addMemberForOnboarding(id, name, username, emailAddress) {
-        super.addMember(name, username, emailAddress, "PROJECT");
+        super.addMember(id, name, username, emailAddress, CONSTANTS.USERS.PROJECT)
+            .then((res) => {
+                console.log(res)
+            }).catch((err) => {
+            console.log(err)
+        });
+    }
+
+
+    /**
+     * Setups member for onboarding.
+     *
+     * @param {String} userId - Username of the member to get the progress.
+     * @param {String} emailAddress - emailAddress of the member to edit to the database.
+     * @param {String} type - type of the member to edit to the database.
+     * @return {Promise}
+     */
+    static editMember(userId, emailAddress, type) {
+        super.editMember(userId, emailAddress, type).then((res) => {
+            console.log(res)
+        }).catch((err) => {
+            console.log(err)
+        });
     }
 
 }
