@@ -1,3 +1,6 @@
+
+const CONSTANTS = require('./Constants');
+
 function checkUser(bot, user) {
     return new Promise(function (resolve, reject) {
         bot.api.groups.list({}, function (err, response) {
@@ -19,15 +22,15 @@ function checkUser(bot, user) {
 }
 
 function startOnBoarding(bot, message, res) {
-    bot.startConversation({
-        user: res.userId,
-        channel: res.userId,
-        text: "Here is the message", function (err, convo){
-            convo.ask("" + res.name + CONSTANTS.RESPONSES.ONBOARDING_GREETING, [
+    bot.startConversation(
+        {
+            user: res.userId,
+            channel: res.userId
+        }, function (err, convo) {
+            convo.ask("Hey there " + res.name + ", " +  CONSTANTS.RESPONSES.ONBOARDING_GREETING, [
                 {}
             ], {}, 'default');
-        }
-    });
+        });
 }
 
 module.exports = {

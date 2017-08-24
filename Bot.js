@@ -43,7 +43,11 @@ module.exports.userBot = (controller) => {
                     bot.reply(message, CONSTANTS.RESPONSES.NOT_PREPARED);
                 } else {
                     bot.reply(message, CONSTANTS.RESPONSES.PREPARED);
-                    Utils.startOnBoarding(bot, message, res);
+                    try{
+                        Utils.startOnBoarding(bot, message, res);
+                    }catch (e){
+                        console.error(e)
+                    }
                 }
             }).catch((err) => {
                 bot.reply(message, CONSTANTS.RESPONSES.DEFAULT);
