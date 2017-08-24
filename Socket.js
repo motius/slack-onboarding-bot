@@ -1,50 +1,27 @@
-const io = require('socket.io');
-var listener;
-var socketConnected;
-function startSocket(server, PORT) {
-    listener = io.listen(server);
-    server.listen(PORT);
-    listener.on('connection', function (socket) {
+const ws = require('nodejs-websocket');
 
-        console.log('Robot connected!');
-        socketConnected = socket;
-        socket.on('disconnect', () => {
-            const tabId = socket.id;
-            console.log('Robot disconnected!');
-            socket.leave(tabId);
+let server;
+function createServer(PORT) {
+    server = ws.createServer(function (conn) {
+        console.log("New connection");
+        conn.on("text", function (str) {
+            console.log("Received " + str);
+            conn.sendText(str.toUpperCase() + "!!!")
         });
-
-        socket.on('create-node', emitData('create-node'));
-
-        // Take the event input and just pass the received data
-        function emitData(eventName) {
-            return (data) => {
-                console.log(data)
-                // if (data.canvasId) {
-                //     const roomId = data.canvasId;
-                //     socket.broadcast.to(roomId).emit(eventName, data);
-                // } else if (eventName.indexOf("global-constant") !== -1) {
-                //     socket.broadcast.emit(eventName, data);
-                // } else {
-                //     console.error("You need to pass the canvas Id!");
-                //     socket.emit(eventName, "You need to pass the canvasId to the socket endpoint");
-                // }
-            };
-        }
-    });
+        conn.on("close", function (code, reason) {
+            console.log("Connection closed")
+        });
+    }).listen(PORT);
 }
 
-function emitEvent(event) {
-    try {
-        console.log(event)
-        socketConnected.emit(event);
-    } catch (e) {
-        console.log(e)
-    }
-
+function sendCommand(msg) {
+    server.connections.forEach(function (conn) {
+        conn.sendText(msg)
+    })
 }
 
 module.exports = {
-    startSocket: startSocket,
-    emitEvent: emitEvent,
+    createServer: createServer,
+    sendCommand: sendCommand,
 };
+

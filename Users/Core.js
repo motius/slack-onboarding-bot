@@ -28,7 +28,7 @@ class Core extends Member {
             .then((res) => {
                 console.log(res)
             }).catch((err) => {
-            console.log(err)
+            console.error(err)
         });
     }
 
@@ -38,8 +38,8 @@ class Core extends Member {
      * @param {String} userId - userId of the member to get the progress.
      * @return {Promise}
      */
-    startMemberOnboarding(userId) {
-        //TODO
+    static startMemberOnboarding(userId) {
+        return super.startMemberOnboarding(userId)
     }
 
     /**
@@ -56,7 +56,7 @@ class Core extends Member {
             .then((res) => {
                 console.log(res)
             }).catch((err) => {
-            console.log(err)
+            console.error(err)
         });
     }
 
@@ -72,7 +72,7 @@ class Core extends Member {
         super.editMember(userId, emailAddress, type).then((res) => {
             console.log(res)
         }).catch((err) => {
-            console.log(err)
+            console.error(err)
         });
     }
 }
