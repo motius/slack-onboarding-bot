@@ -5,6 +5,7 @@ const Conversations = require('./Conversations');
 const SocketServer = require('./Socket');
 const CoreMember = require('./Users/Core');
 const ProjectMember = require('./Users/Project');
+const Member = require('./Users/Member');
 
 module.exports.userBot = (controller) => {
     controller.on('bot_channel_join', function (bot, message) {
@@ -227,5 +228,36 @@ module.exports.userBot = (controller) => {
         }).catch((err) => {
             bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
         });
+    });
+
+    controller.hears(['progress'], ['direct_message'], function (bot, message) {
+       Utils.checkUserPermission(bot, message.user).then((permission) => {
+
+           // Check for correct syntax (at least one member must be entered)
+           let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
+
+           if(members == null) {
+               bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_MISSING);
+               return;
+           }
+
+           Member.getMemberProgress(members[1]).then((res) => {
+               Ticket.getTickets().then((totalTickets) => {
+                   let progress = 0;
+                   let fulfilledTickets = res.tickets;
+
+                   progress = fulfilledTickets.length/totalTickets.length;
+
+                   bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_REPLY + progress + "%");
+               }).catch((err) => {
+                   console.log(err);
+               })
+           }).catch((err) => {
+               bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_NOT_FOUND_IN_DATABASE);
+               console.log(err);
+           });
+       }).catch((err) => {
+           bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+       });
     });
 };
