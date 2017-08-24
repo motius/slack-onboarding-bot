@@ -29,9 +29,28 @@ module.exports.userBot = (controller) => {
     });
 
     controller.hears(['robot'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
-
         let event = message.text.substr(message.text.indexOf(":") + 1);
-        SocketServer.emitEvent(event);
+        SocketServer.sendCommand(event);
+    });
+
+    controller.hears(['start_member'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
+        Utils.checkUserPermission(bot, message.user).then((permission) => {
+            let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
+
+            CoreMember.startMemberOnboarding(members[1]).then((res) => {
+                console.log(res)
+                if (res == null) {
+                    bot.reply(message, CONSTANTS.RESPONSES.NOT_PREPARED);
+                } else {
+                    bot.reply(message, CONSTANTS.RESPONSES.PREPARED);
+                    Utils.startOnBoarding(bot, message, res);
+                }
+            }).catch((err) => {
+                bot.reply(message, CONSTANTS.RESPONSES.DEFAULT);
+            });
+        }).catch((permission) => {
+            bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+        });
     });
 
     controller.hears(['add_ticket'], ['direct_message'], function (bot, message) {
@@ -152,7 +171,7 @@ module.exports.userBot = (controller) => {
 
             })
         }).catch((permission) => {
-            bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+            bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
         });
 
 
@@ -201,7 +220,7 @@ module.exports.userBot = (controller) => {
 
             })
         }).catch((permission) => {
-            bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+            bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
         });
 
 
@@ -226,7 +245,7 @@ module.exports.userBot = (controller) => {
                 console.log(err);
             });
         }).catch((err) => {
-            bot.reply(CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+            bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
         });
     });
 

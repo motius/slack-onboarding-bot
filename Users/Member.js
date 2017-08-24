@@ -88,8 +88,8 @@ class Member {
      * @param {String} userId - userId of the member to get the progress.
      * @return {Promise}
      */
-    startMemberOnboarding(userId) {
-        throw "Abstract method getMemberProgress not implemented";
+    static startMemberOnboarding(userId) {
+        return member.findOne({userId: userId});
     }
 
     /**
@@ -103,7 +103,6 @@ class Member {
      * @return {Promise}
      */
     static addMember(id, name, username, emailAddress, type) {
-
         return member.create({
             userId: id,
             name: name,

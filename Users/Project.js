@@ -38,8 +38,8 @@ class Project extends Member {
      * @param {String} userId - userId of the member to get the progress.
      * @return {Promise}
      */
-    startMemberOnboarding(userId) {
-        //TODO
+    static startMemberOnboarding(userId) {
+        return super.startMemberOnboarding(userId);
     }
 
     /**
