@@ -8,4 +8,4 @@ RUN npm install -g
 
 COPY . /build/
 
-CMD ["nodemon", "server.js"]
+CMD ["npm", "start"]
