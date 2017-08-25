@@ -3,13 +3,17 @@ version: '2'
 services:
   db:
     image: "mongo:latest"
-
+    networks:
+      - python
+      
   bot:
     build: .
     links:
       - db:mongo
     depends_on:
       - db
+  networks:
+    - python
 
 networks:
   proxy:
