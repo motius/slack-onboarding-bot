@@ -10,3 +10,8 @@ services:
       - db:mongo
     depends_on:
       - db
+
+networks:
+  proxy:
+    external:
+      name: python
