@@ -1,10 +1,11 @@
 const CONSTANTS = require('./Constants');
+const logger = require("winston").loggers.get('bot');
 
 function checkUser(bot, user) {
     return new Promise(function (resolve, reject) {
         bot.api.groups.list({}, function (err, response) {
             if (err) {
-                console.log(err);
+                logger.debug(err);
                 reject(false);
             } else {
                 response.groups.forEach(function (group) {
@@ -25,7 +26,7 @@ function startOnBoarding(bot, message, user) {
         if (err) {
             bot.botkit.log('Failed to open IM with user', err)
         }
-        console.log(res);
+        logger.debug(res);
         bot.startConversation(
             {
                 user: user.userId,

@@ -1,4 +1,5 @@
 const ws = require('nodejs-websocket');
+const logger = require("winston").loggers.get('socket');
 
 let server;
 function createServer(PORT) {

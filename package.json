@@ -14,5 +14,8 @@
     "node-wit": "^4.2.0",
     "nodejs-websocket": "^1.7.1",
     "nodemon": "^1.11.0"
+  },
+  "devDependencies": {
+    "winston": "^2.3.0"
   }
 }

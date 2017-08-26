@@ -6,6 +6,7 @@ const SocketServer = require('./Socket');
 const CoreMember = require('./Users/Core');
 const ProjectMember = require('./Users/Project');
 const Member = require('./Users/Member');
+const logger = require("winston").loggers.get('bot');
 
 module.exports.userBot = (controller) => {
     controller.on('bot_channel_join', function (bot, message) {
@@ -38,7 +39,7 @@ module.exports.userBot = (controller) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
 
             CoreMember.startMemberOnboarding(members[1]).then((res) => {
-                console.log(res)
+                logger.debug(res)
                 if (res == null) {
                     bot.reply(message, CONSTANTS.RESPONSES.NOT_PREPARED);
                 } else {
@@ -46,7 +47,7 @@ module.exports.userBot = (controller) => {
                     try{
                         Utils.startOnBoarding(bot, message, res);
                     }catch (e){
-                        console.error(e)
+                        logger.info(e)
                     }
                 }
             }).catch((err) => {
@@ -82,9 +83,9 @@ module.exports.userBot = (controller) => {
                             pattern: '1',
                             callback: function (response, convo) {
                                 Ticket.addTicket(ticket, response.text).then((res) => {
-                                    console.log(res)
+                                    logger.debug(res)
                                 }).catch((err) => {
-                                    console.log(err)
+                                    logger.debug(err)
                                 });
                                 convo.say('OK you are done!');
                                 convo.next();
@@ -246,7 +247,7 @@ module.exports.userBot = (controller) => {
                 });
                 bot.reply(message, tickets);
             }).catch((err) => {
-                console.log(err);
+                logger.debug(err);
             });
         }).catch((err) => {
             bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
@@ -273,11 +274,11 @@ module.exports.userBot = (controller) => {
 
                    bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_REPLY + progress + "%");
                }).catch((err) => {
-                   console.log(err);
+                   logger.debug(err);
                })
            }).catch((err) => {
                bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_NOT_FOUND_IN_DATABASE);
-               console.log(err);
+               logger.debug(err);
            });
        }).catch((err) => {
            bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
