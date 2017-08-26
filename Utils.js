@@ -1,4 +1,3 @@
-
 const CONSTANTS = require('./Constants');
 
 function checkUser(bot, user) {
@@ -21,16 +20,39 @@ function checkUser(bot, user) {
     })
 }
 
-function startOnBoarding(bot, message, res) {
-    bot.startConversation(
-        {
-            user: res.userId,
-            channel: res.userId
-        }, function (err, convo) {
-            convo.ask("Hey there " + res.name + ", " +  CONSTANTS.RESPONSES.ONBOARDING_GREETING, [
-                {}
-            ], {}, 'default');
-        });
+function startOnBoarding(bot, message, user) {
+    bot.api.im.open({user: user.userId}, (err, res) => {
+        if (err) {
+            bot.botkit.log('Failed to open IM with user', err)
+        }
+        console.log(res);
+        bot.startConversation(
+            {
+                user: user.userId,
+                channel: res.channel.id
+            }, function (err, convo) {
+                convo.ask("Hey there " + user.name + ", " + CONSTANTS.RESPONSES.ONBOARDING_GREETING, [
+                    {
+                        pattern: 'DONE',
+                        callback: function (response, convo) {
+
+                            convo.say('OK you are done!');
+                            convo.next();
+
+                        }
+                    },
+                    {
+                        default: true,
+                        callback: function (response, convo) {
+                            // just repeat the question
+                            convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
+                            convo.repeat();
+                            convo.next();
+                        }
+                    }
+                ], {}, 'default');
+            })
+    });
 }
 
 module.exports = {
