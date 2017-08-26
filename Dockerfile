@@ -1,11 +1,11 @@
 FROM node
 
-COPY package.json /build/package.json
-
 WORKDIR /build
+
+COPY package.json /build/package.json
 
 RUN npm install
 
 COPY . /build/
 
-CMD ["nodemon", "server.js"]
+#CMD ["npm", "start"]

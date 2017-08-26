@@ -8,15 +8,14 @@ stages:
 # ---------------------------------------------------------------------------------------------- # v
 
 variables:
-   PROJECT: motius-bot
-   CONTAINER_NAME: $PROJECT-$CI_BUILD_REF_NAME
+   COMPOSE_PROJECT_NAME: $CI_PROJECT_NAME-$CI_BUILD_REF_NAME
 # ---------------------------------------------------------------------------------------------- #
 # ---------------------------------------- CLEAN ----------------------------------------------- #
 # ---------------------------------------------------------------------------------------------- #
 prepare:clean:
    stage: prepare
    script:
-       - docker rm -f $PROJECT-$CI_BUILD_REF_NAME
+       - docker-compose rm -f
    allow_failure: true
    only:
        - master
@@ -51,11 +50,10 @@ deploy:general:
 # ---------------------------------------------------------------------------------------------- #
 
 logs:
-  stage: deploy
-  script:
-    - docker-compose logs
-  when: manual
-  tags:
-    - staging
-
-
+    stage: deploy
+    script:
+        - docker-compose logs
+    when: manual
+    tags:
+        - staging
+ 

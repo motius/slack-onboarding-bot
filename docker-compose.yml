@@ -5,11 +5,9 @@ services:
     image: "mongo:latest"
     networks:
       - proxy
-
-
-  wewash-release:
+      
+  bot:
     build: .
-    container_name: ${CONTAINER_NAME}
     links:
       - db:mongo
     depends_on:
@@ -20,4 +18,4 @@ services:
 networks:
   proxy:
     external:
-      name: motius_proxy
+      name: python
