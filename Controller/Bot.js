@@ -10,7 +10,7 @@ const logger = require("winston").loggers.get('bot');
 module.exports.userBot = (controller, client) => {
 
     Utils.setWit(client);
-
+    controller.middleware.receive.use(client.receive);
     controller.on('bot_channel_join', function (bot, message) {
         bot.reply(message, "I'm here!")
     });
