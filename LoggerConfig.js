@@ -9,7 +9,7 @@ const LOGLEVEL = {
     SILLY: 'silly'
 };
 
-const loglevel = LOGLEVEL.DEBUG;
+const loglevel = LOGLEVEL.INFO;
 
 winston.loggers.add('bot', {
         console: {

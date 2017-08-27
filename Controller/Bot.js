@@ -1,14 +1,16 @@
-const Ticket = require('./TicketClass');
-const CONSTANTS = require('./Constants');
+const Ticket = require('../Models/TicketClass');
+const CONSTANTS = require('../Utility/Constants');
 const Utils = require('./Utils');
-const Conversations = require('./Conversations');
-const SocketServer = require('./Socket');
-const CoreMember = require('./Users/Core');
-const ProjectMember = require('./Users/Project');
-const Member = require('./Users/Member');
+const SocketServer = require('../Socket');
+const CoreMember = require('../Models/Users/Core');
+const ProjectMember = require('../Models/Users/Project');
+const Member = require('../Models/Users/Member');
 const logger = require("winston").loggers.get('bot');
 
-module.exports.userBot = (controller) => {
+module.exports.userBot = (controller, client) => {
+
+    Utils.setWit(client);
+
     controller.on('bot_channel_join', function (bot, message) {
         bot.reply(message, "I'm here!")
     });
@@ -39,14 +41,13 @@ module.exports.userBot = (controller) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
 
             CoreMember.startMemberOnboarding(members[1]).then((res) => {
-                logger.debug(res)
                 if (res == null) {
                     bot.reply(message, CONSTANTS.RESPONSES.NOT_PREPARED);
                 } else {
                     bot.reply(message, CONSTANTS.RESPONSES.PREPARED);
-                    try{
+                    try {
                         Utils.startOnBoarding(bot, message, res);
-                    }catch (e){
+                    } catch (e) {
                         logger.info(e)
                     }
                 }
@@ -255,33 +256,33 @@ module.exports.userBot = (controller) => {
     });
 
     controller.hears(['progress'], ['direct_message'], function (bot, message) {
-       Utils.checkUserPermission(bot, message.user).then((permission) => {
+        Utils.checkUserPermission(bot, message.user).then((permission) => {
 
-           // Check for correct syntax (at least one member must be entered)
-           let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
+            // Check for correct syntax (at least one member must be entered)
+            let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
 
-           if(members == null) {
-               bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_MISSING);
-               return;
-           }
+            if (members == null) {
+                bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_MISSING);
+                return;
+            }
 
-           Member.getMemberProgress(members[1]).then((res) => {
-               Ticket.getTickets().then((totalTickets) => {
-                   let progress = 0;
-                   let fulfilledTickets = res.tickets;
+            Member.getMemberProgress(members[1]).then((res) => {
+                Ticket.getTickets().then((totalTickets) => {
+                    let progress = 0;
+                    let fulfilledTickets = res.tickets;
 
-                   progress = fulfilledTickets.length/totalTickets.length;
+                    progress = fulfilledTickets.length / totalTickets.length;
 
-                   bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_REPLY + progress + "%");
-               }).catch((err) => {
-                   logger.debug(err);
-               })
-           }).catch((err) => {
-               bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_NOT_FOUND_IN_DATABASE);
-               logger.debug(err);
-           });
-       }).catch((err) => {
-           bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
-       });
+                    bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_REPLY + progress + "%");
+                }).catch((err) => {
+                    logger.debug(err);
+                })
+            }).catch((err) => {
+                bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_NOT_FOUND_IN_DATABASE);
+                logger.debug(err);
+            });
+        }).catch((err) => {
+            bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+        });
     });
 };

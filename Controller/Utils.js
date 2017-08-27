@@ -1,5 +1,13 @@
-const CONSTANTS = require('./Constants');
-const logger = require("winston").loggers.get('bot');
+const CONSTANTS = require('../Utility/Constants');
+const logger = require("winston").loggers.get('utils');
+const Ticket = require('../Models/TicketClass');
+
+let wit = null;
+
+function setWit(wit) {
+    wit = wit;
+}
+
 
 function checkUser(bot, user) {
     return new Promise(function (resolve, reject) {
@@ -26,6 +34,14 @@ function startOnBoarding(bot, message, user) {
         if (err) {
             bot.botkit.log('Failed to open IM with user', err)
         }
+        let tickets;
+        Ticket.getTickets().then((totalTickets) => {
+            tickets = totalTickets;
+            logger.info(totalTickets);
+            console.log(totalTickets);
+        }).catch((err) => {
+            logger.debug(err);
+        });
         logger.debug(res);
         bot.startConversation(
             {
@@ -34,19 +50,25 @@ function startOnBoarding(bot, message, user) {
             }, function (err, convo) {
                 convo.ask("Hey there " + user.name + ", " + CONSTANTS.RESPONSES.ONBOARDING_GREETING, [
                     {
-                        pattern: 'DONE',
+                        pattern: 'YES',
                         callback: function (response, convo) {
-
                             convo.say('OK you are done!');
                             convo.next();
 
                         }
                     },
                     {
+                        pattern: 'STOP',
+                        callback: function (response, convo) {
+                            convo.say(CONSTANTS.RESPONSES.ONBOARDING_STOP);
+                            convo.next();
+                        }
+                    },
+                    {
                         default: true,
                         callback: function (response, convo) {
                             // just repeat the question
-                            convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
+                            convo.say(CONSTANTS.RESPONSES.ONBOARDING_HOLD);
                             convo.repeat();
                             convo.next();
                         }
@@ -59,4 +81,5 @@ function startOnBoarding(bot, message, user) {
 module.exports = {
     checkUserPermission: checkUser,
     startOnBoarding: startOnBoarding,
+    setWit: setWit,
 };
