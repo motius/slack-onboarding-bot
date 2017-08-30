@@ -36,7 +36,7 @@ class Member {
             },
             type: String,
             tickets: [{
-                ticketdId: Number,
+                ticketId: Number,
                 status: Boolean
             }]
         });
@@ -111,6 +111,10 @@ class Member {
             type: type,
             tickets: []
         });
+    }
+
+    static addFinishedTicket(userId, ticketId) {
+        return member.findOneAndUpdate({userId: userId }, {$push: {tickets: { ticketId: ticketId, status: true }}}, function(err, model) { console.log(err) } );
     }
 }
 

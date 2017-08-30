@@ -265,12 +265,12 @@ module.exports.userBot = (controller) => {
                    let progress = 0;
                    let fulfilledTickets = res.tickets;
 
-                   progress = fulfilledTickets.length/totalTickets.length;
+                   progress = (fulfilledTickets.length/totalTickets.length)*100;
 
                    bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_REPLY + progress + "%");
                }).catch((err) => {
                    console.log(err);
-               })
+               });
            }).catch((err) => {
                bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_NOT_FOUND_IN_DATABASE);
                console.log(err);
@@ -278,5 +278,47 @@ module.exports.userBot = (controller) => {
        }).catch((err) => {
            bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
        });
+    });
+
+    controller.hears(['finished'], ['direct_message'], function(bot, message) {
+        Utils.checkUserPermission(bot, message.user).then((permission) => {
+            // Check for correct syntax (string must contain a number)
+            let ids = message.text.match(CONSTANTS.REGEXES.ticketIdRegex)
+
+            if(ids == null)
+            {
+                bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NO_ID);
+                return;
+            }
+
+            // Check if the ticket exists and is not yet checked
+            Ticket.getTicket(ids[1]).then((ticket) => {
+                if(ticket == null)
+                {
+                    bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_FOUND);
+                    return;
+                }
+
+                Member.getMemberProgress(message.user).then((res) => {
+                    let fullfilledTickets = res.tickets;
+
+                    if(fullfilledTickets.includes(ids[1]))
+                    {
+                        bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_ALREADY_FINISHED);
+                    }
+                    else
+                    {
+                        bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_YET_FINISHED);
+                        Member.addFinishedTicket(message.user, ids[1]);
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                });
+            }).catch((err) => {
+                console.log(err);
+            });
+        }).catch((err) => {
+            bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+        })
     });
 };
