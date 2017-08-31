@@ -2,7 +2,7 @@
 
 
 let TicketItem;
-const CONSTANTS = require('./Constants');
+const CONSTANTS = require('../Utility/Constants');
 
 /**
  * @class

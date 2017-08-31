@@ -1,6 +1,6 @@
 'use strict';
 const Member = require("./Member");
-const CONSTANTS = require("../Constants");
+const CONSTANTS = require("../../Utility/Constants");
 
 let projectMember;
 

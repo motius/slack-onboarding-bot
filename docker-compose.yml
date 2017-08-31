@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  db:
+    image: "mongo:latest"
+    networks:
+      - proxy
+      
+  bot:
+    build: .
+    links:
+      - db:mongo
+    depends_on:
+      - db
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external:
+      name: python
