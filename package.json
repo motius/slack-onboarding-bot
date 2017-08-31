@@ -11,9 +11,10 @@
     "express": "^4.15.3",
     "mongodb": "^2.2.26",
     "mongoose": "^4.9.8",
-    "node-wit": "^4.2.0",
+    "node-wit": "^4.3.0",
     "nodejs-websocket": "^1.7.1",
-    "nodemon": "^1.11.0"
+    "nodemon": "^1.11.0",
+    "winston": "^2.3.1"
   },
   "devDependencies": {
     "winston": "^2.3.0"

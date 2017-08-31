@@ -318,8 +318,18 @@ module.exports.userBot = (controller, client) => {
 
                 Member.getMemberProgress(message.user).then((res) => {
                     let fullfilledTickets = res.tickets;
+                    let alreadyChecked = false;
 
-                    if(fullfilledTickets.includes(ids[1]))
+                    for(i = 0; i<res.tickets.length; i++)
+                    {
+                        if(res.tickets[i].ticketId == ids[1])
+                        {
+                            alreadyChecked = true;
+                            break;
+                        }
+                    }
+
+                    if(alreadyChecked)
                     {
                         bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_ALREADY_FINISHED);
                     }
