@@ -38,6 +38,9 @@ class Member {
             tickets: [{
                 ticketId: Number,
                 status: Boolean
+            }],
+            suggestedTickets: [{
+               ticketId: Number
             }]
         });
 
@@ -46,6 +49,16 @@ class Member {
         };
         member = db.model('User', mongoSchema);
     };
+
+    /**
+     * Returns the type of the Member.
+     *
+     * @param {String} userId - userId of the member to get the type.
+     * @return {Promise}
+     */
+    static getMember(userId) {
+        return member.findOne({userId: userId});
+    }
 
     /**
      * Returns the type of the Member.
@@ -109,12 +122,17 @@ class Member {
             username: username,
             emailAddress: emailAddress,
             type: type,
-            tickets: []
+            tickets: [],
+            suggestedTickets: []
         });
     }
 
     static addFinishedTicket(userId, ticketId) {
         return member.findOneAndUpdate({userId: userId }, {$push: {tickets: { ticketId: ticketId, status: true }}}, function(err, model) { console.log(err) } );
+    }
+
+    static removeSuggestedTicket(userId, ticketId) {
+        return member.findOneAndUpdate({ userId: userId }, {$pull: {suggestedTickets: {ticketId: ticketId}}}, function (err, model)  { console.log(err) });
     }
 }
 

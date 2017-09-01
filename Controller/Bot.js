@@ -143,45 +143,65 @@ module.exports.userBot = (controller, client) => {
     controller.hears(['prepare_member'], ['direct_message'], function (bot, message) {
         Utils.checkUserPermission(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
-            bot.startConversation(message, function (err, convo) {
-                convo.ask(CONSTANTS.RESPONSES.MEMBER_TYPE + "\nHint:  " + CONSTANTS.RESPONSES.HINT_MEMBER, [
-                    {
-                        pattern: 'Core',
-                        callback: function (response, convo) {
-                            // Extract user information from slack and add new member
-                            bot.api.users.info({user: members[1]}, (error, response) => {
-                                let {id, name, real_name, profile} = response.user;
-                                CoreMember.addMemberForOnboarding(id, real_name, name, profile.email);
-                                convo.say('OK you are done!');
-                                convo.next();
-                            });
 
-                        }
-                    },
-                    {
-                        pattern: 'Project',
-                        callback: function (response, convo) {
-                            // Extract user information from slack and add new member
-                            bot.api.users.info({user: members[1]}, (error, response) => {
-                                let {id, name, real_name, profile} = response.user;
-                                ProjectMember.addMemberForOnboarding(id, real_name, name, profile.email);
-                                convo.say('OK you are done!');
-                                convo.next();
-                            });
-                        }
-                    },
-                    {
-                        default: true,
-                        callback: function (response, convo) {
-                            // just repeat the question
-                            convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
-                            convo.repeat();
-                            convo.next();
-                        }
-                    }
-                ], {}, 'default');
+            // There has to be a match
+            if (members == null)
+            {
+                bot.reply(message, CONSTANTS.RESPONSES.PREPARE_MEMBER_NO_MEMBER_ENTERED);
+                return;
+            }
 
-            })
+            // Check if this user is already in the database
+            Member.getMember(members[1]).then((user) => {
+
+                if(user != null)
+                {
+                    bot.reply(message, CONSTANTS.RESPONSES.PREPARE_MEMBER_MEMBER_ALREADY_PREPARED);
+                    return;
+                }
+
+                bot.startConversation(message, function (err, convo) {
+                    convo.ask(CONSTANTS.RESPONSES.MEMBER_TYPE + "\nHint:  " + CONSTANTS.RESPONSES.HINT_MEMBER, [
+                        {
+                            pattern: 'Core',
+                            callback: function (response, convo) {
+                                // Extract user information from slack and add new member
+                                bot.api.users.info({user: members[1]}, (error, response) => {
+                                    let {id, name, real_name, profile} = response.user;
+                                    CoreMember.addMemberForOnboarding(id, real_name, name, profile.email);
+                                    convo.say('OK you are done!');
+                                    convo.next();
+                                });
+
+                            }
+                        },
+                        {
+                            pattern: 'Project',
+                            callback: function (response, convo) {
+                                // Extract user information from slack and add new member
+                                bot.api.users.info({user: members[1]}, (error, response) => {
+                                    let {id, name, real_name, profile} = response.user;
+                                    ProjectMember.addMemberForOnboarding(id, real_name, name, profile.email);
+                                    convo.say('OK you are done!');
+                                    convo.next();
+                                });
+                            }
+                        },
+                        {
+                            default: true,
+                            callback: function (response, convo) {
+                                // just repeat the question
+                                convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
+                                convo.repeat();
+                                convo.next();
+                            }
+                        }
+                    ], {}, 'default');
+
+                })
+            }).catch((err) => {
+               logger.debug(err);
+            });
         }).catch((permission) => {
             bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
         });
@@ -192,44 +212,56 @@ module.exports.userBot = (controller, client) => {
     controller.hears(['edit_member'], ['direct_message'], function (bot, message) {
         Utils.checkUserPermission(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
-            bot.startConversation(message, function (err, convo) {
-                convo.ask(CONSTANTS.RESPONSES.MEMBER_TYPE + "\nHint:  " + CONSTANTS.RESPONSES.HINT_MEMBER, [
-                    {
-                        pattern: 'Core',
-                        callback: function (response, convo) {
-                            // Extract user information from slack and add new member
-                            bot.api.users.info({user: members[1]}, (error, response) => {
-                                let {id, name, real_name, profile} = response.user;
-                                CoreMember.editMember(id, profile.email, 'Core');
-                                convo.say('OK you are done!');
-                                convo.next();
-                            });
 
-                        }
-                    },
-                    {
-                        pattern: 'Project',
-                        callback: function (response, convo) {
-                            // Extract user information from slack and add new member
-                            bot.api.users.info({user: members[1]}, (error, response) => {
-                                let {id, name, real_name, profile} = response.user;
-                                ProjectMember.editMember(id, profile.email, 'Core');
-                                convo.say('OK you are done!');
-                                convo.next();
-                            });
-                        }
-                    },
-                    {
-                        default: true,
-                        callback: function (response, convo) {
-                            // just repeat the question
-                            convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
-                            convo.repeat();
-                            convo.next();
-                        }
-                    }
-                ], {}, 'default');
+            // There has to be a match
+            if (members == null)
+            {
+                bot.reply(message, CONSTANTS.RESPONSES.PREPARE_MEMBER_NO_MEMBER_ENTERED);
+                return;
+            }
 
+            Member.getMember(members[1]).then((user) => {
+                bot.startConversation(message, function (err, convo) {
+                    convo.ask(CONSTANTS.RESPONSES.MEMBER_TYPE + "\nHint:  " + CONSTANTS.RESPONSES.HINT_MEMBER, [
+                        {
+                            pattern: 'Core',
+                            callback: function (response, convo) {
+                                // Extract user information from slack and add new member
+                                bot.api.users.info({user: members[1]}, (error, response) => {
+                                    let {id, name, real_name, profile} = response.user;
+                                    CoreMember.editMember(id, profile.email, 'Core');
+                                    convo.say('OK you are done!');
+                                    convo.next();
+                                });
+
+                            }
+                        },
+                        {
+                            pattern: 'Project',
+                            callback: function (response, convo) {
+                                // Extract user information from slack and add new member
+                                bot.api.users.info({user: members[1]}, (error, response) => {
+                                    let {id, name, real_name, profile} = response.user;
+                                    ProjectMember.editMember(id, profile.email, 'Core');
+                                    convo.say('OK you are done!');
+                                    convo.next();
+                                });
+                            }
+                        },
+                        {
+                            default: true,
+                            callback: function (response, convo) {
+                                // just repeat the question
+                                convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
+                                convo.repeat();
+                                convo.next();
+                            }
+                        }
+                    ], {}, 'default');
+
+                })
+            }).catch((err) => {
+                logger.debug(err);
             })
         }).catch((permission) => {
             bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
@@ -310,12 +342,6 @@ module.exports.userBot = (controller, client) => {
 
             // Check if the ticket exists and is not yet checked
             Ticket.getTicket(ids[1]).then((ticket) => {
-                if(ticket == null)
-                {
-                    bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_FOUND);
-                    return;
-                }
-
                 Member.getMemberProgress(message.user).then((res) => {
                     let fullfilledTickets = res.tickets;
                     let alreadyChecked = false;
@@ -337,12 +363,13 @@ module.exports.userBot = (controller, client) => {
                     {
                         bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_YET_FINISHED);
                         Member.addFinishedTicket(message.user, ids[1]);
+                        Member.removeSuggestedTicket(message.user, ids[1]);
                     }
                 }).catch((err) => {
-                    console.log(err);
+                    bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_FOUND);
                 });
             }).catch((err) => {
-                console.log(err);
+                logger.debug(err);
             });
         }).catch((err) => {
             bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
