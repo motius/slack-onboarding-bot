@@ -1,6 +1,7 @@
 const CONSTANTS = require('../Utility/Constants');
 const logger = require("winston").loggers.get('utils');
 const Ticket = require('../Models/TicketClass');
+const Response = require('../Responses');
 
 let wit = null;
 
@@ -68,6 +69,7 @@ function startOnBoarding(bot, message, user) {
                         default: true,
                         callback: function (response, convo) {
                             // just repeat the question
+                            Response.addReply(response.text);
                             convo.say(CONSTANTS.RESPONSES.ONBOARDING_HOLD);
                             convo.repeat();
                             convo.next();

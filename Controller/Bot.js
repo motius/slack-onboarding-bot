@@ -1,4 +1,3 @@
-
 const Ticket = require('../Models/TicketClass');
 const CONSTANTS = require('../Utility/Constants');
 const Utils = require('./Utils');
@@ -6,6 +5,7 @@ const SocketServer = require('../Socket');
 const CoreMember = require('../Models/Users/Core');
 const ProjectMember = require('../Models/Users/Project');
 const Member = require('../Models/Users/Member');
+const Response = require('../Responses');
 const logger = require("winston").loggers.get('bot');
 
 
@@ -41,14 +41,14 @@ module.exports.userBot = (controller, client) => {
     controller.hears(['start_member'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
         Utils.checkUserPermission(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
-
+            Response.addReply(message.text);
             CoreMember.startMemberOnboarding(members[1]).then((res) => {
-                
+
                 if (res == null) {
                     bot.reply(message, CONSTANTS.RESPONSES.NOT_PREPARED);
                 } else {
                     bot.reply(message, CONSTANTS.RESPONSES.PREPARED);
-                    
+
                     try {
                         Utils.startOnBoarding(bot, message, res);
                     } catch (e) {
@@ -66,6 +66,7 @@ module.exports.userBot = (controller, client) => {
     controller.hears(['add_ticket'], ['direct_message'], function (bot, message) {
         Utils.checkUserPermission(bot, message.user).then(permission => {
 
+            Response.addReply(message.text);
             // Check for correct Syntax
             let ticket = "";
 
@@ -88,10 +89,10 @@ module.exports.userBot = (controller, client) => {
                             pattern: '1',
                             callback: function (response, convo) {
                                 Ticket.addTicket(ticket, response.text).then((res) => {
-                                    
+
                                     logger.debug(res)
                                 }).catch((err) => {
-                                    
+
                                     logger.debug(err)
                                 });
                                 convo.say('OK you are done!');
@@ -144,9 +145,9 @@ module.exports.userBot = (controller, client) => {
         Utils.checkUserPermission(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
 
+            Response.addReply(message.text);
             // There has to be a match
-            if (members == null)
-            {
+            if (members == null) {
                 bot.reply(message, CONSTANTS.RESPONSES.PREPARE_MEMBER_NO_MEMBER_ENTERED);
                 return;
             }
@@ -154,8 +155,7 @@ module.exports.userBot = (controller, client) => {
             // Check if this user is already in the database
             Member.getMember(members[1]).then((user) => {
 
-                if(user != null)
-                {
+                if (user != null) {
                     bot.reply(message, CONSTANTS.RESPONSES.PREPARE_MEMBER_MEMBER_ALREADY_PREPARED);
                     return;
                 }
@@ -200,7 +200,7 @@ module.exports.userBot = (controller, client) => {
 
                 })
             }).catch((err) => {
-               logger.debug(err);
+                logger.debug(err);
             });
         }).catch((permission) => {
             bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
@@ -213,9 +213,9 @@ module.exports.userBot = (controller, client) => {
         Utils.checkUserPermission(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
 
+            Response.addReply(message.text);
             // There has to be a match
-            if (members == null)
-            {
+            if (members == null) {
                 bot.reply(message, CONSTANTS.RESPONSES.PREPARE_MEMBER_NO_MEMBER_ENTERED);
                 return;
             }
@@ -286,7 +286,7 @@ module.exports.userBot = (controller, client) => {
                 });
                 bot.reply(message, tickets);
             }).catch((err) => {
-                
+
                 logger.debug(err);
             });
         }).catch((err) => {
@@ -314,7 +314,7 @@ module.exports.userBot = (controller, client) => {
                     let progress = 0;
                     let fulfilledTickets = res.tickets;
 
-                   progress = (fulfilledTickets.length/totalTickets.length)*100;
+                    progress = (fulfilledTickets.length / totalTickets.length) * 100;
 
                     bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_REPLY + progress + "%");
                 }).catch((err) => {
@@ -329,13 +329,12 @@ module.exports.userBot = (controller, client) => {
         });
     });
 
-    controller.hears(['finished'], ['direct_message'], function(bot, message) {
+    controller.hears(['finished'], ['direct_message'], function (bot, message) {
         Utils.checkUserPermission(bot, message.user).then((permission) => {
             // Check for correct syntax (string must contain a number)
             let ids = message.text.match(CONSTANTS.REGEXES.ticketIdRegex)
 
-            if(ids == null)
-            {
+            if (ids == null) {
                 bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NO_ID);
                 return;
             }
@@ -346,21 +345,17 @@ module.exports.userBot = (controller, client) => {
                     let fullfilledTickets = res.tickets;
                     let alreadyChecked = false;
 
-                    for(i = 0; i<res.tickets.length; i++)
-                    {
-                        if(res.tickets[i].ticketId == ids[1])
-                        {
+                    for (i = 0; i < res.tickets.length; i++) {
+                        if (res.tickets[i].ticketId == ids[1]) {
                             alreadyChecked = true;
                             break;
                         }
                     }
 
-                    if(alreadyChecked)
-                    {
+                    if (alreadyChecked) {
                         bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_ALREADY_FINISHED);
                     }
-                    else
-                    {
+                    else {
                         bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_YET_FINISHED);
                         Member.addFinishedTicket(message.user, ids[1]);
                         Member.removeSuggestedTicket(message.user, ids[1]);
