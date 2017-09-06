@@ -3,13 +3,12 @@ const CONSTANTS = require('../Utility/Constants');
 const logger = require("winston").loggers.get('utils');
 const Ticket = require('../Models/TicketClass');
 const Response = require('../Responses');
+const Member = require("../Models/Users/Member.js");
 let wit = null;
 
 function setWit(init) {
     wit = init;
 }
-
-
 
 
 function startOnBoarding(bot, message, user) {
@@ -25,14 +24,6 @@ function startOnBoarding(bot, message, user) {
                 channel: res.channel.id
             }, function (err, convo) {
                 convo.ask("Hey there " + user.name + ", " + CONSTANTS.RESPONSES.ONBOARDING_GREETING, [
-                    {
-                        pattern: 'YES',
-                        callback: function (response, convo) {
-                            convo.say('OK you are done!');
-                            convo.next();
-
-                        }
-                    },
                     {
                         pattern: 'STOP',
                         callback: function (response, convo) {
@@ -71,17 +62,20 @@ function startOnBoarding(bot, message, user) {
 function ticketsDelivery(bot, userId, channelId) {
     let tickets;
     Ticket.getTickets().then((totalTickets) => {
-        tickets = totalTickets;
+        tickets = totalTickets.slice(0, 3);
         logger.debug(totalTickets);
-        var string = {
+        let string = {
             'text': 'Here are a few things you need to know, tell me when you are done with them',
             'attachments': [],
             // 'icon_url': 'http://lorempixel.com/48/48'
         };
-        tickets.map(function (ticket, i) {
+        tickets.forEach(function (ticket, i) {
             string.attachments[i] = {'color': '#4285F4'};
             string.attachments[i].title = ticket.ticketData + "  (" + ticket.ticketId + ")" + "\n";
         });
+        Member.addSuggestedTicket(userId, tickets.map((t) => {
+            return t.ticketId;
+        }));
 
         bot.startConversation({
             user: userId,

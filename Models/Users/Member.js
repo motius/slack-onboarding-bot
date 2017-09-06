@@ -39,9 +39,7 @@ class Member {
                 ticketId: Number,
                 status: Boolean
             }],
-            suggestedTickets: [{
-               ticketId: Number
-            }]
+            suggestedTickets: []
         });
 
         mongoSchema.query.byUserId = function (userId) {
@@ -128,11 +126,31 @@ class Member {
     }
 
     static addFinishedTicket(userId, ticketId) {
-        return member.findOneAndUpdate({userId: userId }, {$push: {tickets: { ticketId: ticketId, status: true }}}, function(err, model) { console.log(err) } );
+        return member.findOneAndUpdate({userId: userId}, {
+            $push: {
+                tickets: {
+                    ticketId: ticketId,
+                    status: true
+                }
+            }
+        }, function (err, model) {
+            if (err) throw "ERROR FINISHING TICKET!";
+            console.log(err)
+        });
+    }
+
+    static addSuggestedTicket(userId, ticketIds) {
+        return member.findOneAndUpdate({userId: userId}, {$push: {suggestedTickets: ticketIds}}, function (err, model) {
+            if (err) throw "ERROR ADDING SUGGESTED TICKET!";
+        });
     }
 
     static removeSuggestedTicket(userId, ticketId) {
-        return member.findOneAndUpdate({ userId: userId }, {$pull: {suggestedTickets: {ticketId: ticketId}}}, function (err, model)  { console.log(err) });
+        let self = this;
+        return member.findOneAndUpdate({userId: userId}, {$pull: {suggestedTickets: ticketId}}, function (err, model) {
+            if (err) throw "ERROR REMOVING SUGGESTED TICKET!";
+            self.addFinishedTicket(userId, ticketId);
+        });
     }
 }
 
