@@ -1,6 +1,7 @@
 const Ticket = require('../Models/TicketClass');
 const CONSTANTS = require('../Utility/Constants');
-const Utils = require('./OnBoarding');
+const OnBoarding = require('./OnBoarding');
+const Utils = require('../Utility/Utils');
 const SocketServer = require('../Socket');
 const CoreMember = require('../Models/Users/Core');
 const ProjectMember = require('../Models/Users/Project');
@@ -11,7 +12,7 @@ const logger = require("winston").loggers.get('bot');
 
 module.exports.userBot = (controller, client) => {
 
-    Utils.setWit(client);
+    OnBoarding.setWit(client);
     controller.middleware.receive.use(client.receive);
     controller.on('bot_channel_join', function (bot, message) {
         bot.reply(message, "I'm here!")
@@ -39,7 +40,7 @@ module.exports.userBot = (controller, client) => {
     });
 
     controller.hears(['start_member'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
-        Utils.checkUserPermission(bot, message.user).then((permission) => {
+        Utils.checkUser(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
             Response.addReply(message.text);
             CoreMember.startMemberOnboarding(members[1]).then((res) => {
@@ -50,7 +51,7 @@ module.exports.userBot = (controller, client) => {
                     bot.reply(message, CONSTANTS.RESPONSES.PREPARED);
 
                     try {
-                        Utils.startOnBoarding(bot, message, res);
+                        OnBoarding.startOnBoarding(bot, message, res);
                     } catch (e) {
                         logger.info(e)
                     }
@@ -64,7 +65,7 @@ module.exports.userBot = (controller, client) => {
     });
 
     controller.hears(['add_ticket'], ['direct_message'], function (bot, message) {
-        Utils.checkUserPermission(bot, message.user).then(permission => {
+        Utils.checkUser(bot, message.user).then(permission => {
 
             Response.addReply(message.text);
             // Check for correct Syntax
@@ -142,7 +143,7 @@ module.exports.userBot = (controller, client) => {
     });
 
     controller.hears(['prepare_member'], ['direct_message'], function (bot, message) {
-        Utils.checkUserPermission(bot, message.user).then((permission) => {
+        Utils.checkUser(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex)
             Response.addReply(message.text);
             // There has to be a match
@@ -153,7 +154,7 @@ module.exports.userBot = (controller, client) => {
 
             // Check if this user is already in the database
             Member.getMember(members[1]).then((user) => {
-                
+
                 if (user != null) {
                     bot.reply(message, CONSTANTS.RESPONSES.PREPARE_MEMBER_MEMBER_ALREADY_PREPARED);
                     return;
@@ -209,7 +210,7 @@ module.exports.userBot = (controller, client) => {
     });
 
     controller.hears(['edit_member'], ['direct_message'], function (bot, message) {
-        Utils.checkUserPermission(bot, message.user).then((permission) => {
+        Utils.checkUser(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
 
             Response.addReply(message.text);
@@ -270,7 +271,7 @@ module.exports.userBot = (controller, client) => {
     });
 
     controller.hears(['list_tickets'], ['direct_message'], function (bot, message) {
-        Utils.checkUserPermission(bot, message.user).then((permission) => {
+        Utils.checkUser(bot, message.user).then((permission) => {
             Ticket.getTickets().then((res) => {
                 let tickets = {
                     'text': CONSTANTS.RESPONSES.TICKET_LIST,
@@ -295,7 +296,7 @@ module.exports.userBot = (controller, client) => {
 
     controller.hears(['progress'], ['direct_message'], function (bot, message) {
 
-        Utils.checkUserPermission(bot, message.user).then((permission) => {
+        Utils.checkUser(bot, message.user).then((permission) => {
 
 
             // Check for correct syntax (at least one member must be entered)
@@ -329,7 +330,7 @@ module.exports.userBot = (controller, client) => {
     });
 
     controller.hears(['finished'], ['direct_message'], function (bot, message) {
-        Utils.checkUserPermission(bot, message.user).then((permission) => {
+        Utils.checkUser(bot, message.user).then((permission) => {
             // Check for correct syntax (string must contain a number)
             let ids = message.text.match(CONSTANTS.REGEXES.ticketIdRegex)
 
