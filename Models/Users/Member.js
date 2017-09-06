@@ -39,7 +39,7 @@ class Member {
                 ticketId: Number,
                 status: Boolean
             }],
-            suggestedTickets: []
+            suggestedTickets: [Number]
         });
 
         mongoSchema.query.byUserId = function (userId) {
@@ -121,7 +121,7 @@ class Member {
             emailAddress: emailAddress,
             type: type,
             tickets: [],
-            suggestedTickets: []
+            suggestedTickets: [780, 584]
         });
     }
 
@@ -140,7 +140,7 @@ class Member {
     }
 
     static addSuggestedTicket(userId, ticketIds) {
-        return member.findOneAndUpdate({userId: userId}, {$push: {suggestedTickets: ticketIds}}, function (err, model) { //TODO: Saving of array is done as 2d array
+        return member.findOneAndUpdate({userId: userId}, {$push: {suggestedTickets: ticketId}}, function (err, model) {
             if (err) throw "ERROR ADDING SUGGESTED TICKET!";
         });
     }

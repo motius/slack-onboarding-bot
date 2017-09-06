@@ -370,4 +370,19 @@ module.exports.userBot = (controller, client) => {
             bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
         })
     });
+
+    controller.hears(['check_all'], ['direct_message'], function (bot, message) {
+       Utils.checkUser(bot, message.user).then((permission) => {
+           Member.getMember(message.user).then((user) => {
+              user.suggestedTickets.forEach(function(ticketId) {
+                 Member.addFinishedTicket(message.user, ticketId);
+                 Member.removeSuggestedTicket(message.user, ticketId);
+              });
+           }).catch((err) => {
+               logger.debug(err);
+           });
+       }).catch((err) => {
+           bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+       })
+    });
 };
