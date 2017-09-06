@@ -92,19 +92,13 @@ function ticketsDelivery(bot, userId, channelId) {
         tickets = totalTickets;
         logger.debug(totalTickets);
         var string = {
-            'text': 'This is a pre-text',
-            'attachments': [
-                {
-                    // 'fallback': 'To be useful, I need you to invite me in a channel.',
-                    // 'title': 'How can I help you?',
-                    // 'text': 'To be useful, I need you to invite me in a channel ',
-                    // 'color': '#7CD197'
-                }
-            ],
+            'text': 'Here are a few things you need to know, tell me when you are done with them',
+            'attachments': [],
             // 'icon_url': 'http://lorempixel.com/48/48'
         };
         tickets.map(function (ticket, i) {
-            string.attachments[i].title += ticket.ticketData + "  (" + ticket.ticketId + ")" + "\n";
+            string.attachments[i] = {'color': '#4285F4'};
+            string.attachments[i].title = ticket.ticketData + "  (" + ticket.ticketId + ")" + "\n";
         });
 
         bot.startConversation({
