@@ -144,11 +144,7 @@ module.exports.userBot = (controller, client) => {
     controller.hears(['prepare_member'], ['direct_message'], function (bot, message) {
         Utils.checkUserPermission(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex)
-            Response.addReply(message.text).then((res) => {
-                bot.reply(message, res);
-            }).catch((err) => {
-                bot.reply(message, err);
-            });
+            Response.addReply(message.text);
             // There has to be a match
             if (members == null) {
                 bot.reply(message, CONSTANTS.RESPONSES.PREPARE_MEMBER_NO_MEMBER_ENTERED);
@@ -157,7 +153,7 @@ module.exports.userBot = (controller, client) => {
 
             // Check if this user is already in the database
             Member.getMember(members[1]).then((user) => {
-
+                
                 if (user != null) {
                     bot.reply(message, CONSTANTS.RESPONSES.PREPARE_MEMBER_MEMBER_ALREADY_PREPARED);
                     return;
