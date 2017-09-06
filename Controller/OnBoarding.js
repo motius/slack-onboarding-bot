@@ -91,10 +91,22 @@ function ticketsDelivery(bot, userId, channelId) {
     Ticket.getTickets().then((totalTickets) => {
         tickets = totalTickets;
         logger.debug(totalTickets);
-        let string = "";
-        tickets.map(function (ticket) {
-            string += ticket.ticketData + "  (" + ticket.ticketId + ")" + "\n";
+        var string = {
+            'text': 'This is a pre-text',
+            'attachments': [
+                {
+                    // 'fallback': 'To be useful, I need you to invite me in a channel.',
+                    // 'title': 'How can I help you?',
+                    // 'text': 'To be useful, I need you to invite me in a channel ',
+                    // 'color': '#7CD197'
+                }
+            ],
+            // 'icon_url': 'http://lorempixel.com/48/48'
+        };
+        tickets.map(function (ticket, i) {
+            string.attachments[i].title += ticket.ticketData + "  (" + ticket.ticketId + ")" + "\n";
         });
+
         bot.startConversation({
             user: userId,
             channel: channelId
