@@ -1,6 +1,6 @@
 const Ticket = require('../Models/TicketClass');
 const CONSTANTS = require('../Utility/Constants');
-const Utils = require('./Utils');
+const Utils = require('./OnBoarding');
 const SocketServer = require('../Socket');
 const CoreMember = require('../Models/Users/Core');
 const ProjectMember = require('../Models/Users/Project');
