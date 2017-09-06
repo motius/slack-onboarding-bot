@@ -143,9 +143,9 @@ module.exports.userBot = (controller, client) => {
 
     controller.hears(['prepare_member'], ['direct_message'], function (bot, message) {
         Utils.checkUserPermission(bot, message.user).then((permission) => {
-            let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
-            bot.reply(message, "Hey");
+            let members = message.text.match(CONSTANTS.REGEXES.userIdRegex)
             Response.addReply(message.text);
+            bot.reply(message, "Hey");
             // There has to be a match
             if (members == null) {
                 bot.reply(message, CONSTANTS.RESPONSES.PREPARE_MEMBER_NO_MEMBER_ENTERED);
@@ -203,8 +203,6 @@ module.exports.userBot = (controller, client) => {
                 logger.debug(err);
             });
         }).catch((permission) => {
-
-            bot.reply(message, permission);
             bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
         });
 
