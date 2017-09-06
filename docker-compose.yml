@@ -3,8 +3,15 @@ version: '2'
 services:
   db:
     image: "mongo:latest"
+    environment: 
+      NetworkName: motius_proxy
+      VIRTUAL_HOST: "mongo.${VIRTUAL_HOST}"
+      VIRTUAL_PORT: 27017
+      CERT_NAME: ""
     networks:
       - proxy
+    expose: 
+      - 27017
       
   bot:
     build: .
@@ -18,4 +25,4 @@ services:
 networks:
   proxy:
     external:
-      name: python
+      name: motius_proxy
