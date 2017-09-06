@@ -140,7 +140,7 @@ class Member {
     }
 
     static addSuggestedTicket(userId, ticketIds) {
-        return member.findOneAndUpdate({userId: userId}, {$push: {suggestedTickets: ticketIds}}, function (err, model) {
+        return member.findOneAndUpdate({userId: userId}, {$push: {suggestedTickets: ticketIds}}, function (err, model) { //TODO: Saving of array is done as 2d array
             if (err) throw "ERROR ADDING SUGGESTED TICKET!";
         });
     }
