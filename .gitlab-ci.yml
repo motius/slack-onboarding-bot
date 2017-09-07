@@ -58,3 +58,18 @@ logs:
     tags:
         - staging
  
+# ---------------------------------------------------------------------------------------------- #
+# ----------------------------------------- EXPORT --------------------------------------------- #
+# ---------------------------------------------------------------------------------------------- #
+
+export:
+    stage: deploy
+    script:
+        - docker-compose exec db mongoexport --db test --collection traffic > export.json
+    artifacts:
+        paths:
+            - export.json
+    when: manual
+    tags:
+        - staging
+ 
