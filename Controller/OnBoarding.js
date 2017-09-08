@@ -16,38 +16,48 @@ function startOnBoarding(bot, message, user) {
         if (err) {
             bot.botkit.log('Failed to open IM with user', err)
         }
-
+        let task;
         logger.debug(res);
         bot.startConversation(
             {
                 user: user.userId,
                 channel: res.channel.id
             }, function (err, convo) {
+                task = cron.schedule("*/5 * * * * *", function () {
+                    convo.repeat();
+                    convo.next();
+                }, false);
                 convo.ask("Hey there " + user.name + ", " + CONSTANTS.RESPONSES.ONBOARDING_GREETING, [
                     {
                         pattern: 'STOP',
                         callback: function (response, convo) {
-                            convo.say(CONSTANTS.RESPONSES.ONBOARDING_STOP);
-                            convo.next();
+                            bot.reply(message, CONSTANTS.RESPONSES.ONBOARDING_HOLD);
+                            // convo.say(CONSTANTS.RESPONSES.ONBOARDING_HOLD);
+                            // convo.next();
+                            task.start();
                         }
                     },
                     {
                         default: true,
                         callback: function (response, convo) {
                             // just repeat the question
+                            task.stop();
                             wit.receive(bot, response, function (err) {
                                 if (err) {
-                                    console.log(err);
+                                    logger.debug("ERROR", err);
                                 } else {
                                     Response.addReply(response.text);
-                                    console.log("REPSONSE:", Object.keys(response.entities));
+                                    logger.debug("RESPONSE:", Object.keys(response.entities));
                                     if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.CONFIRMATION) !== -1) {
                                         ticketsDelivery(bot, user.userId, res.channel.id);
+                                        task.destroy();
                                     } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
                                         logger.debug("Utils ", "help");
+                                        task.destroy();
                                     } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.STOP) !== -1) {
-                                        convo.say(CONSTANTS.RESPONSES.ONBOARDING_HOLD);
-                                        convo.repeat();
+                                        convo.say("TEST");
+
+                                        task.start();
                                     }
                                 }
                             });

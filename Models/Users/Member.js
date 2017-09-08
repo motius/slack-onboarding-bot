@@ -121,13 +121,13 @@ class Member {
             emailAddress: emailAddress,
             type: type,
             tickets: [],
-            suggestedTickets: [780, 584]
+            suggestedTickets: []
         });
     }
 
     static addFinishedTicket(userId, ticketId) {
         return member.findOneAndUpdate({userId: userId}, {
-            $push: {
+            $addToSet: {
                 tickets: {
                     ticketId: ticketId,
                     status: true
@@ -140,7 +140,7 @@ class Member {
     }
 
     static addSuggestedTicket(userId, ticketIds) {
-        return member.findOneAndUpdate({userId: userId}, {$push: {suggestedTickets: ticketId}}, function (err, model) {
+        return member.findOneAndUpdate({userId: userId}, {$addToSet: {suggestedTickets: {$each: ticketIds}}}, function (err, model) {
             if (err) throw "ERROR ADDING SUGGESTED TICKET!";
         });
     }
