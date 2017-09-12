@@ -49,7 +49,7 @@ function startOnBoarding(bot, message, user) {
                                     Response.addReply(response.text);
                                     logger.debug("RESPONSE:", Object.keys(response.entities));
                                     if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.CONFIRMATION) !== -1) {
-                                        ticketsDelivery(bot, user.userId, res.channel.id);
+                                        ticketsDelivery(bot, message, user.userId, res.channel.id);
                                         task.destroy();
                                     } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
                                         logger.debug("Utils ", "help");
@@ -69,44 +69,77 @@ function startOnBoarding(bot, message, user) {
     });
 }
 
-function ticketsDelivery(bot, userId, channelId) {
-    let tickets;
+function ticketsDelivery(bot, message, userId, channelId) {
+    let tickets, string;
     Ticket.getTickets().then((totalTickets) => {
-        tickets = totalTickets.slice(0, 3);
-        logger.debug(totalTickets);
-        let string = {
-            'text': 'Here are a few things you need to know, tell me when you are done with them',
-            'attachments': [],
-            // 'icon_url': 'http://lorempixel.com/48/48'
-        };
-        tickets.forEach(function (ticket, i) {
-            string.attachments[i] = {'color': '#4285F4'};
-            string.attachments[i].title = ticket.ticketData + "  (" + ticket.ticketId + ")" + "\n";
-        });
-        Member.addSuggestedTicket(userId, tickets.map((t) => {
-            return t.ticketId;
-        }));
 
+        let updateTickets = function () {
+            tickets = totalTickets.slice(0, 3);
+            totalTickets = totalTickets.slice(3);
+            logger.debug(totalTickets);
+            string = {
+                'text': 'Here are a few things you need to know, tell me when you are done with them',
+                'attachments': [],
+                // 'icon_url': 'http://lorempixel.com/48/48'
+            };
+            tickets.forEach(function (ticket, i) {
+                string.attachments[i] = {'color': '#4285F4'};
+                string.attachments[i].title = ticket.ticketData + "  (" + ticket.ticketId + ")" + "\n";
+            });
+            Member.addSuggestedTicket(userId, tickets.map((t) => {
+                return t.ticketId;
+            }));
+
+            console.log(string)
+        };
+        updateTickets();
         bot.startConversation({
             user: userId,
             channel: channelId
         }, function (err, convo) {
+
             convo.ask(string, [
                 {
                     default: true,
                     callback: function (response, convo) {
                         // just repeat the question
+
+                        console.log("HERE")
                         wit.receive(bot, response, function (err) {
                             if (err) {
-                                console.log(err);
+                                logger.info(err);
                             } else {
-                                console.log("REPSONSE:", Object.keys(response.entities));
+                                Response.addReply(response.text);
+                                logger.debug("RESPONSE:", Object.keys(response.entities));
+                                if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT.default) !== -1) {
 
+                                    if (response.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value === CONSTANTS.INTENTS.TICKET_INTENT.finish) {
+                                        response.entities[CONSTANTS.INTENTS.WIT_TICKETID].forEach(function (t) {
+                                            updateTickets();
+                                            tickets = tickets.filter(function (id) {
+                                                return id !== t.value;
+                                            });
+                                            Member.addFinishedTicket(userId, t.value);
+                                            Member.removeSuggestedTicket(userId, t.value);
+                                        });
+                                    }
+                                } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
+                                    logger.debug("Utils ", "help");
+
+                                } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.STOP) !== -1) {
+                                    convo.say("TEST");
+
+                                }
                             }
                         });
-                        convo.repeat();
-                        convo.next();
+                        if (tickets.length < 0) {
+                            convo.next();
+                        } else {
+                            convo.repeat();
+                            convo.next();
+                        }
                     }
+
                 }
             ], {}, 'default');
         });

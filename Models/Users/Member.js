@@ -134,8 +134,9 @@ class Member {
                 }
             }
         }, function (err, model) {
+            console.log("ERR", err)
             if (err) throw "ERROR FINISHING TICKET!";
-            console.log(err)
+
         });
     }
 
@@ -148,8 +149,9 @@ class Member {
     static removeSuggestedTicket(userId, ticketId) {
         let self = this;
         return member.findOneAndUpdate({userId: userId}, {$pull: {suggestedTickets: ticketId}}, function (err, model) {
+            console.log("ERR", err)
             if (err) throw "ERROR REMOVING SUGGESTED TICKET!";
-            self.addFinishedTicket(userId, ticketId);
+            // self.addFinishedTicket(userId, ticketId);
         });
     }
 }
