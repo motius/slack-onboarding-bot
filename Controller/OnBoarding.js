@@ -70,11 +70,12 @@ function startOnBoarding(bot, message, user) {
 }
 
 function ticketsDelivery(bot, message, userId, channelId) {
-    let tickets, string;
+    let tickets = [], string, length, task;
     Ticket.getTickets().then((totalTickets) => {
 
         let updateTickets = function (index) {
-            tickets = totalTickets.slice(0, index);
+            length = 0;
+            tickets = tickets.concat(totalTickets.slice(0, index));
             totalTickets = totalTickets.slice(index);
             logger.debug(totalTickets);
             string = {
@@ -85,6 +86,7 @@ function ticketsDelivery(bot, message, userId, channelId) {
             tickets.forEach(function (ticket, i) {
                 string.attachments[i] = {'color': '#4285F4'};
                 string.attachments[i].title = ticket.ticketData + "  (" + ticket.ticketId + ")" + "\n";
+                length++;
             });
             Member.addSuggestedTicket(userId, tickets.map((t) => {
                 return t.ticketId;
@@ -93,15 +95,19 @@ function ticketsDelivery(bot, message, userId, channelId) {
             console.log(string)
         };
         updateTickets(3);
+
         bot.startConversation({
             user: userId,
             channel: channelId
         }, function (err, convo) {
-
-            convo.setVar('foo', string.text);
-            convo.setVar('list', string.attachments);
-            //
-            convo.setVar('object', string);
+            task = cron.schedule("*/5 * * * * *", function () {
+                convo.say(string);
+                convo.repeat();
+                convo.next();
+            }, false);
+            // convo.setVar('foo', string.text);
+            // convo.setVar('list', string.attachments);
+            // convo.setVar('object', string);
             // convo.say("Hey, {{vars.object.text}}: \n {{#vars.object.attachments}}{{color}}{{title}}{{/vars.object.attachments}}");
             convo.say(string);
             convo.ask("Tell me when you are done with them", [
@@ -109,6 +115,7 @@ function ticketsDelivery(bot, message, userId, channelId) {
                     default: true,
                     callback: function (response, convo) {
                         // just repeat the question
+                        task.stop();
                         wit.receive(bot, response, function (err) {
                             if (err) {
                                 logger.info(err);
@@ -124,30 +131,30 @@ function ticketsDelivery(bot, message, userId, channelId) {
                                                 return ticket.ticketId != t.value;
                                             });
 
-                                            console.log("TICKETS:", tickets);
-                                            updateTickets(tickets.length);
+                                            updateTickets(length - tickets.length);
                                             Member.addFinishedTicket(userId, t.value);
                                             Member.removeSuggestedTicket(userId, t.value);
-
+                                            if (tickets.length < 0) {
+                                                convo.next();
+                                            } else {
+                                                task.start();
+                                                convo.say(string);
+                                                // convo.say("Hey, {{vars.object.text}}: \n {{#vars.object.attachments}}{{/vars.object.attachments}}");
+                                                convo.repeat();
+                                                convo.next();
+                                            }
                                         });
                                     }
                                 } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
                                     logger.debug("Utils ", "help");
-
+                                    task.start();
                                 } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.STOP) !== -1) {
                                     convo.say("TEST");
-
+                                    task.start();
                                 }
                             }
                         });
-                        if (tickets.length < 0) {
-                            convo.next();
-                        } else {
-                            convo.say(string);
-                            // convo.say("Hey, {{vars.object.text}}: \n {{#vars.object.attachments}}{{/vars.object.attachments}}");
-                            convo.repeat();
-                            convo.next();
-                        }
+
                     }
 
                 }
