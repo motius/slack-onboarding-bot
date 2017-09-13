@@ -1,5 +1,7 @@
 'use strict';
 
+const logger = require("winston").loggers.get('member');
+
 let member;
 
 /**
@@ -134,7 +136,7 @@ class Member {
                 }
             }
         }, function (err, model) {
-            console.log("ERR", err)
+            logger.debug("Member ", err)
             if (err) throw "ERROR FINISHING TICKET!";
 
         });
@@ -149,7 +151,7 @@ class Member {
     static removeSuggestedTicket(userId, ticketId) {
         let self = this;
         return member.findOneAndUpdate({userId: userId}, {$pull: {suggestedTickets: ticketId}}, function (err, model) {
-            console.log("ERR", err)
+            logger.debug("Member ", err)
             if (err) throw "ERROR REMOVING SUGGESTED TICKET!";
             // self.addFinishedTicket(userId, ticketId);
         });

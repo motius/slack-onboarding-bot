@@ -46,3 +46,39 @@ winston.loggers.add('server', {
         }
     }
 );
+
+winston.loggers.add('member', {
+        console: {
+            level: loglevel,
+            colorize: true,
+            label: 'server'
+        }
+    }
+);
+
+winston.loggers.add('core', {
+        console: {
+            level: loglevel,
+            colorize: true,
+            label: 'server'
+        }
+    }
+);
+
+winston.loggers.add('project', {
+        console: {
+            level: loglevel,
+            colorize: true,
+            label: 'server'
+        }
+    }
+);
+
+winston.loggers.add('ticket', {
+        console: {
+            level: loglevel,
+            colorize: true,
+            label: 'server'
+        }
+    }
+);

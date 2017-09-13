@@ -1,6 +1,8 @@
 'use strict';
 const Member = require("./Member");
 const CONSTANTS = require("../../Utility/Constants");
+const logger = require("winston").loggers.get('project');
+
 
 let projectMember;
 
@@ -26,9 +28,9 @@ class Project extends Member {
     static getMemberProgress(userId) {
         super.getMemberProgress(userId)
             .then((res) => {
-                console.log(res)
+                logger.debug("Project", res)
             }).catch((err) => {
-            console.log(err)
+            logger.debug("Project", err)
         });
     }
 
@@ -54,9 +56,9 @@ class Project extends Member {
     static addMemberForOnboarding(id, name, username, emailAddress) {
         super.addMember(id, name, username, emailAddress, CONSTANTS.USERS.PROJECT)
             .then((res) => {
-                console.log(res)
+                logger.debug("Project", res)
             }).catch((err) => {
-            console.log(err)
+            logger.debug("Project", err)
         });
     }
 
@@ -71,9 +73,9 @@ class Project extends Member {
      */
     static editMember(userId, emailAddress, type) {
         super.editMember(userId, emailAddress, type).then((res) => {
-            console.log(res)
+            logger.debug("Project", res)
         }).catch((err) => {
-            console.log(err)
+            logger.debug("Project", err)
         });
     }
 
