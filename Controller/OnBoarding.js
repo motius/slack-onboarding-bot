@@ -73,12 +73,12 @@ function ticketsDelivery(bot, message, userId, channelId) {
     let tickets, string;
     Ticket.getTickets().then((totalTickets) => {
 
-        let updateTickets = function () {
-            tickets = totalTickets.slice(0, 3);
-            totalTickets = totalTickets.slice(3);
+        let updateTickets = function (index) {
+            tickets = totalTickets.slice(0, index);
+            totalTickets = totalTickets.slice(index);
             logger.debug(totalTickets);
             string = {
-                'text': 'Here are a few things you need to know, tell me when you are done with them',
+                'text': 'Hey, here are a few things you need to know. ',
                 'attachments': [],
                 // 'icon_url': 'http://lorempixel.com/48/48'
             };
@@ -92,19 +92,23 @@ function ticketsDelivery(bot, message, userId, channelId) {
 
             console.log(string)
         };
-        updateTickets();
+        updateTickets(3);
         bot.startConversation({
             user: userId,
             channel: channelId
         }, function (err, convo) {
 
-            convo.ask(string, [
+            convo.setVar('foo', string.text);
+            convo.setVar('list', string.attachments);
+            //
+            convo.setVar('object', string);
+            // convo.say("Hey, {{vars.object.text}}: \n {{#vars.object.attachments}}{{color}}{{title}}{{/vars.object.attachments}}");
+            convo.say(string);
+            convo.ask("Tell me when you are done with them", [
                 {
                     default: true,
                     callback: function (response, convo) {
                         // just repeat the question
-
-                        console.log("HERE")
                         wit.receive(bot, response, function (err) {
                             if (err) {
                                 logger.info(err);
@@ -115,12 +119,16 @@ function ticketsDelivery(bot, message, userId, channelId) {
 
                                     if (response.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value === CONSTANTS.INTENTS.TICKET_INTENT.finish) {
                                         response.entities[CONSTANTS.INTENTS.WIT_TICKETID].forEach(function (t) {
-                                            updateTickets();
-                                            tickets = tickets.filter(function (id) {
-                                                return id !== t.value;
+
+                                            tickets = tickets.filter(function (ticket) {
+                                                return ticket.ticketId != t.value;
                                             });
+
+                                            console.log("TICKETS:", tickets);
+                                            updateTickets(tickets.length);
                                             Member.addFinishedTicket(userId, t.value);
                                             Member.removeSuggestedTicket(userId, t.value);
+
                                         });
                                     }
                                 } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
@@ -135,6 +143,8 @@ function ticketsDelivery(bot, message, userId, channelId) {
                         if (tickets.length < 0) {
                             convo.next();
                         } else {
+                            convo.say(string);
+                            // convo.say("Hey, {{vars.object.text}}: \n {{#vars.object.attachments}}{{/vars.object.attachments}}");
                             convo.repeat();
                             convo.next();
                         }

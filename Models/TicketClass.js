@@ -3,6 +3,7 @@
 
 let TicketItem;
 const CONSTANTS = require('../Utility/Constants');
+const logger = require("winston").loggers.get('ticket');
 
 /**
  * @class
@@ -88,7 +89,7 @@ class TicketClass {
      */
     static removeTicket(ticketId) {
         return TicketItem.remove({ticketId: ticketId}, function (err) {
-                if (err) console.log("Remove Ticket ERROR ", err);
+                if (err) logger.debug("Remove Ticket ERROR ", err);
                 // removed!
             }
         );
@@ -101,7 +102,7 @@ class TicketClass {
      */
     static removeTickets() {
         return TicketItem.remove({}, function (err) {
-            if (err) console.log("Remove Tickets ERROR ", err);
+            if (err) logger.debug("Remove Tickets ERROR ", err);
             // removed!
         });
     }
