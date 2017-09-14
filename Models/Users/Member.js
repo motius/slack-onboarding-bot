@@ -1,5 +1,7 @@
 'use strict';
 
+const logger = require("winston").loggers.get('member');
+
 let member;
 
 /**
@@ -35,10 +37,7 @@ class Member {
                 unique: true
             },
             type: String,
-            tickets: [{
-                ticketId: Number,
-                status: Boolean
-            }],
+            tickets: [Number],
             suggestedTickets: [Number]
         });
 
@@ -126,16 +125,10 @@ class Member {
     }
 
     static addFinishedTicket(userId, ticketId) {
-        return member.findOneAndUpdate({userId: userId}, {
-            $addToSet: {
-                tickets: {
-                    ticketId: ticketId,
-                    status: true
-                }
-            }
-        }, function (err, model) {
+        return member.findOneAndUpdate({userId: userId}, {$addToSet: {tickets: ticketId}}, function (err, model) {
+            logger.debug("Member ", err);
             if (err) throw "ERROR FINISHING TICKET!";
-            console.log(err)
+
         });
     }
 
@@ -148,8 +141,9 @@ class Member {
     static removeSuggestedTicket(userId, ticketId) {
         let self = this;
         return member.findOneAndUpdate({userId: userId}, {$pull: {suggestedTickets: ticketId}}, function (err, model) {
+            logger.debug("Member ", err)
             if (err) throw "ERROR REMOVING SUGGESTED TICKET!";
-            self.addFinishedTicket(userId, ticketId);
+            // self.addFinishedTicket(userId, ticketId);
         });
     }
 }

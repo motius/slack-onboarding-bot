@@ -1,6 +1,7 @@
 'use strict';
 const Member = require("./Member");
 const CONSTANTS = require("../../Utility/Constants");
+const logger = require("winston").loggers.get('core');
 
 let coreMember;
 
@@ -26,9 +27,9 @@ class Core extends Member {
     static getMemberProgress(userId) {
         super.getMemberProgress(userId)
             .then((res) => {
-                console.log(res)
+                logger.debug("Core ", res)
             }).catch((err) => {
-            console.error(err)
+            logger.debug("Core ", err)
         });
     }
 
@@ -54,9 +55,9 @@ class Core extends Member {
     static addMemberForOnboarding(id, name, username, emailAddress) {
         super.addMember(id, name, username, emailAddress, CONSTANTS.USERS.CORE)
             .then((res) => {
-                console.log(res)
+                logger.debug("Core ", res)
             }).catch((err) => {
-            console.error(err)
+            logger.debug("Core ", err)
         });
     }
 
@@ -70,9 +71,9 @@ class Core extends Member {
      */
     static editMember(userId, emailAddress, type) {
         super.editMember(userId, emailAddress, type).then((res) => {
-            console.log(res)
+            logger.debug("Core ", res)
         }).catch((err) => {
-            console.error(err)
+            logger.debug("Core ", err)
         });
     }
 }

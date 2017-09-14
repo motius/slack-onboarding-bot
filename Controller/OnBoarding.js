@@ -23,7 +23,7 @@ function startOnBoarding(bot, message, user) {
                 user: user.userId,
                 channel: res.channel.id
             }, function (err, convo) {
-                task = cron.schedule("*/5 * * * * *", function () {
+                task = cron.schedule("*/10 * * * * *", function () {
                     convo.repeat();
                     convo.next();
                 }, false);
@@ -49,7 +49,7 @@ function startOnBoarding(bot, message, user) {
                                     Response.addReply(response.text);
                                     logger.debug("RESPONSE:", Object.keys(response.entities));
                                     if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.CONFIRMATION) !== -1) {
-                                        ticketsDelivery(bot, user.userId, res.channel.id);
+                                        ticketsDelivery(bot, message, user.userId, res.channel.id);
                                         task.destroy();
                                     } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
                                         logger.debug("Utils ", "help");
@@ -69,44 +69,95 @@ function startOnBoarding(bot, message, user) {
     });
 }
 
-function ticketsDelivery(bot, userId, channelId) {
-    let tickets;
+function ticketsDelivery(bot, message, userId, channelId) {
+    let tickets = [], string, length, task;
     Ticket.getTickets().then((totalTickets) => {
-        tickets = totalTickets.slice(0, 3);
-        logger.debug(totalTickets);
-        let string = {
-            'text': 'Here are a few things you need to know, tell me when you are done with them',
-            'attachments': [],
-            // 'icon_url': 'http://lorempixel.com/48/48'
+
+        let updateTickets = function (index) {
+            length = 0;
+            tickets = tickets.concat(totalTickets.slice(0, index));
+            totalTickets = totalTickets.slice(index);
+            logger.debug(totalTickets);
+            string = {
+                'text': 'Hey, here are a few things you need to know. ',
+                'attachments': [],
+                // 'icon_url': 'http://lorempixel.com/48/48'
+            };
+            tickets.forEach(function (ticket, i) {
+                string.attachments[i] = {'color': '#4285F4'};
+                string.attachments[i].title = ticket.ticketData + "  (" + ticket.ticketId + ")" + "\n";
+                length++;
+            });
+            Member.addSuggestedTicket(userId, tickets.map((t) => {
+                return t.ticketId;
+            }));
+
+            console.log(string)
         };
-        tickets.forEach(function (ticket, i) {
-            string.attachments[i] = {'color': '#4285F4'};
-            string.attachments[i].title = ticket.ticketData + "  (" + ticket.ticketId + ")" + "\n";
-        });
-        Member.addSuggestedTicket(userId, tickets.map((t) => {
-            return t.ticketId;
-        }));
+        updateTickets(3);
 
         bot.startConversation({
             user: userId,
             channel: channelId
         }, function (err, convo) {
-            convo.ask(string, [
+            task = cron.schedule("*/20 * * * * *", function () {
+                convo.say(string);
+                convo.repeat();
+                convo.next();
+            }, false);
+            task.start();
+            // convo.setVar('foo', string.text);
+            // convo.setVar('list', string.attachments);
+            // convo.setVar('object', string);
+            // convo.say("Hey, {{vars.object.text}}: \n {{#vars.object.attachments}}{{color}}{{title}}{{/vars.object.attachments}}");
+            convo.say(string);
+            convo.ask("Tell me when you are done with them", [
                 {
                     default: true,
                     callback: function (response, convo) {
                         // just repeat the question
+                        task.stop();
                         wit.receive(bot, response, function (err) {
                             if (err) {
-                                console.log(err);
+                                logger.info(err);
                             } else {
-                                console.log("REPSONSE:", Object.keys(response.entities));
+                                Response.addReply(response.text);
+                                logger.debug("RESPONSE:", Object.keys(response.entities));
+                                if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT.default) !== -1) {
 
+                                    if (response.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value === CONSTANTS.INTENTS.TICKET_INTENT.finish) {
+                                        response.entities[CONSTANTS.INTENTS.WIT_TICKETID].forEach(function (t) {
+
+                                            tickets = tickets.filter(function (ticket) {
+                                                return ticket.ticketId != t.value;
+                                            });
+
+                                            updateTickets(length - tickets.length);
+                                            Member.addFinishedTicket(userId, t.value);
+                                            Member.removeSuggestedTicket(userId, t.value);
+                                            if (tickets.length < 0) {
+                                                convo.next();
+                                            } else {
+                                                task.start();
+                                                convo.say(string);
+                                                // convo.say("Hey, {{vars.object.text}}: \n {{#vars.object.attachments}}{{/vars.object.attachments}}");
+                                                convo.repeat();
+                                                convo.next();
+                                            }
+                                        });
+                                    }
+                                } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
+                                    logger.debug("Utils ", "help");
+                                    task.start();
+                                } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.STOP) !== -1) {
+                                    convo.say("TEST");
+                                    task.start();
+                                }
                             }
                         });
-                        convo.repeat();
-                        convo.next();
+
                     }
+
                 }
             ], {}, 'default');
         });
@@ -127,7 +178,7 @@ function witProcessMessage(bot, message)
 
             if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.CONFIRMATION) !== -1) {
                 ticketsDelivery(bot, user.userId, res.channel.id);
-                task.destroy();
+                // task.destroy();
             } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT) !== -1) {
                 switch (message.entities.ticket_intent[0].value)
                 {
@@ -149,7 +200,7 @@ function witProcessMessage(bot, message)
                     default:
                         break;
                 }
-            } else if(Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.MEMBER_INTENT) !== -1) {
+            } else if(Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.MEMBER_ENTITY.default) !== -1) {
                 switch(message.entities.member_intent[0].value)
                 {
                     case "prepare_member":
@@ -160,10 +211,10 @@ function witProcessMessage(bot, message)
                 }
             } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
                 logger.debug("Utils ", "help");
-                task.destroy();
+                // task.destroy();
             } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.STOP) !== -1) {
                 convo.say("TEST");
-                task.start();
+                // task.start();
             }
         }
     });
