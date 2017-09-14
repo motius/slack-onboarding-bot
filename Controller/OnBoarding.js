@@ -23,7 +23,7 @@ function startOnBoarding(bot, message, user) {
                 user: user.userId,
                 channel: res.channel.id
             }, function (err, convo) {
-                task = cron.schedule("*/5 * * * * *", function () {
+                task = cron.schedule("*/10 * * * * *", function () {
                     convo.repeat();
                     convo.next();
                 }, false);
@@ -100,11 +100,12 @@ function ticketsDelivery(bot, message, userId, channelId) {
             user: userId,
             channel: channelId
         }, function (err, convo) {
-            task = cron.schedule("*/5 * * * * *", function () {
+            task = cron.schedule("*/20 * * * * *", function () {
                 convo.say(string);
                 convo.repeat();
                 convo.next();
             }, false);
+            task.start();
             // convo.setVar('foo', string.text);
             // convo.setVar('list', string.attachments);
             // convo.setVar('object', string);

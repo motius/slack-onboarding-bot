@@ -37,10 +37,7 @@ class Member {
                 unique: true
             },
             type: String,
-            tickets: [{
-                ticketId: Number,
-                status: Boolean
-            }],
+            tickets: [Number],
             suggestedTickets: [Number]
         });
 
@@ -128,15 +125,8 @@ class Member {
     }
 
     static addFinishedTicket(userId, ticketId) {
-        return member.findOneAndUpdate({userId: userId}, {
-            $addToSet: {
-                tickets: {
-                    ticketId: ticketId,
-                    status: true
-                }
-            }
-        }, function (err, model) {
-            logger.debug("Member ", err)
+        return member.findOneAndUpdate({userId: userId}, {$addToSet: {tickets: ticketId}}, function (err, model) {
+            logger.debug("Member ", err);
             if (err) throw "ERROR FINISHING TICKET!";
 
         });
