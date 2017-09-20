@@ -127,7 +127,7 @@ module.exports.userBot = (controller, client) => {
 
     });
 
-    controller.hears(['test'], ['direct_message'], function (bot, message) {
+    controller.hears(['\.*'], ['direct_message'], function (bot, message) {
         OnBoarding.witProcessMessage(bot, message);
     })
 };

@@ -4,6 +4,9 @@ const logger = require("winston").loggers.get('utils');
 const Ticket = require('../Models/TicketClass');
 const Response = require('../Responses');
 const Member = require("../Models/Users/Member.js");
+var TicketClass = require("../Models/TicketClass.js");
+var Utils = require("../Utility/Utils.js");
+var CoreMember = require("../Models/Users/Core.js");
 let wit = null;
 
 function setWit(init) {
@@ -23,7 +26,7 @@ function startOnBoarding(bot, message, user) {
                 user: user.userId,
                 channel: res.channel.id
             }, function (err, convo) {
-                task = cron.schedule("*/10 * * * * *", function () {
+                task = cron.schedule("*/30 * * * * *", function () {
                     convo.repeat();
                     convo.next();
                 }, false);
@@ -70,7 +73,7 @@ function startOnBoarding(bot, message, user) {
 }
 
 function ticketsDelivery(bot, message, userId, channelId) {
-    let tickets = [], string, length, task;
+    let tickets = [], string, length, task, counter = 0;
     Ticket.getTickets().then((totalTickets) => {
 
         let updateTickets = function (index) {
@@ -100,7 +103,12 @@ function ticketsDelivery(bot, message, userId, channelId) {
             user: userId,
             channel: channelId
         }, function (err, convo) {
-            task = cron.schedule("*/20 * * * * *", function () {
+            task = cron.schedule("*/30 * * * * *", function () {
+                if (counter > 4) {
+                    task.destroy();
+                }
+                string.text = CONSTANTS.RESPONSES.REMINDER[counter];
+                counter++;
                 convo.say(string);
                 convo.repeat();
                 convo.next();
@@ -133,6 +141,7 @@ function ticketsDelivery(bot, message, userId, channelId) {
                                             });
 
                                             updateTickets(length - tickets.length);
+                                            counter = 0;
                                             Member.addFinishedTicket(userId, t.value);
                                             Member.removeSuggestedTicket(userId, t.value);
                                             if (tickets.length < 0) {
@@ -167,8 +176,7 @@ function ticketsDelivery(bot, message, userId, channelId) {
 
 }
 
-function witProcessMessage(bot, message)
-{
+function witProcessMessage(bot, message) {
     // Do all the entity checks here and call the functions accordingly.
     wit.receive(bot, message.text, function (err) {
         if (err) {
@@ -176,22 +184,21 @@ function witProcessMessage(bot, message)
         } else {
             logger.debug("RESPONSE:", Object.keys(message.entities));
 
+
             if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.CONFIRMATION) !== -1) {
-                ticketsDelivery(bot, user.userId, res.channel.id);
-                // task.destroy();
-            } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT) !== -1) {
-                switch (message.entities.ticket_intent[0].value)
-                {
-                    case "tickets_set":
+
+            } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT.default) !== -1) {
+                switch (message.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value) {
+                    case CONSTANTS.INTENTS.TICKET_INTENT.set:
                         addTicket(message, bot);
                         break;
-                    case "ticket_list":
+                    case CONSTANTS.INTENTS.TICKET_INTENT.list:
                         listTickets(message, bot);
                         break;
-                    case "ticket_finish":
+                    case CONSTANTS.INTENTS.TICKET_INTENT.finish:
                         finishTicket(message, bot);
                         break;
-                    case "ticket_progress":
+                    case CONSTANTS.INTENTS.TICKET_INTENT.progress:
                         showTicketProgress(message, bot);
                         break;
                     case "tickets_finish_suggested":
@@ -200,15 +207,23 @@ function witProcessMessage(bot, message)
                     default:
                         break;
                 }
-            } else if(Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.MEMBER_ENTITY.default) !== -1) {
-                switch(message.entities.member_intent[0].value)
-                {
-                    case "prepare_member":
-                        prepareMember(message, bot);
-                        break;
-                    default:
-                        break;
-                }
+            } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.MEMBER_INTENT.default) !== -1) {
+
+                Utils.checkUser(bot, message.user).then((permission) => {
+                    switch (message.entities[CONSTANTS.INTENTS.MEMBER_INTENT.default][0].value) {
+                        case CONSTANTS.INTENTS.MEMBER_INTENT.prepare:
+                            prepareMember(message, bot);
+                            break;
+                        case CONSTANTS.INTENTS.MEMBER_INTENT.start:
+                            startMember(message, bot);
+                            break;
+                        default:
+                            break;
+                    }
+                }).catch((err) => {
+                    bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+                });
+
             } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
                 logger.debug("Utils ", "help");
                 // task.destroy();
@@ -220,37 +235,64 @@ function witProcessMessage(bot, message)
     });
 }
 
+function startMember(message, bot) {
+    let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
+    Response.addReply(message.text);
+    CoreMember.startMemberOnboarding(members[1]).then((res) => {
+
+        if (res == null) {
+            bot.reply(message, CONSTANTS.RESPONSES.NOT_PREPARED);
+        } else {
+            bot.reply(message, CONSTANTS.RESPONSES.PREPARED);
+
+            try {
+                startOnBoarding(bot, message, res);
+            } catch (e) {
+                logger.info(e)
+            }
+        }
+    }).catch((err) => {
+        bot.reply(message, CONSTANTS.RESPONSES.DEFAULT);
+    });
+
+}
+
 function addTicket(message, bot) {
     // Check if there is actually a ticket to add
-    if(Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_TICKET) == -1 ||
-    Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_PRIORITY) == -1)
-    {
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_TICKET) == -1 ||
+        Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_PRIORITY) == -1) {
         bot.reply(message, CONSTANTS.RESPONSES.TICKET_EMPTY);
         return;
     }
 
-    TicketClass.addTicket(message.entities.wit_ticket.value, message.entities.wit_priority.value);
-    bot.reply(message, "I added your ticket to the database.");
-}
-
-function prepareMember(message, bot)
-{
-    // Check if there actually is a member
-    if(Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER) == -1 ||
-    Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER_TYPE) == -1)
-    {
-        bot.reply(message, CONSTANTS.RESPONSES.ADD_MEMBER_EMPTY);
-        return;
-    }
-
-    bot.api.users.info({user: message.entities.wit_member[0].value}, (error, response) => {
-        let {id, name, real_name, profile} = response.user;
-        Member.addMember(id, real_name, name, profile.email, message.entities.wit_member_type[0].value);
+    TicketClass.addTicket(message.entities[CONSTANTS.INTENTS.WIT_TICKET].value, message.entities[CONSTANTS.INTENTS.WIT_PRIORITY].value).then((res) => {
+        bot.reply(message, CONSTANTS.RESPONSES.ADD_TICKET_SUCCESS);
+    }).catch((err) => {
+        bot.reply(message, CONSTANTS.RESPONSES.ADD_TICKET_FAIL);
     });
 }
 
-function listTickets(message, bot)
-{
+function prepareMember(message, bot) {
+    // Check if there actually is a member
+
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER) == -1 ||
+        Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER_TYPE) == -1) {
+        bot.reply(message, CONSTANTS.RESPONSES.ADD_MEMBER_EMPTY);
+        return;
+    }
+    let user = message.entities[CONSTANTS.INTENTS.WIT_MEMBER][0].value.match(CONSTANTS.REGEXES.userIdRegex);
+
+    bot.api.users.info({user: user[1]}, (error, response) => {
+        let {id, name, real_name, profile} = response.user;
+        Member.addMember(id, real_name, name, profile.email, message.entities[CONSTANTS.INTENTS.WIT_MEMBER_TYPE][0].value).then((res) => {
+            bot.reply(message, CONSTANTS.RESPONSES.PREPARE_SUCCESS);
+        }).catch((err) => {
+            bot.reply(message, CONSTANTS.RESPONSES.PREPARE_FAIL);
+        });
+    });
+}
+
+function listTickets(message, bot) {
     Ticket.getTickets().then((res) => {
         let tickets = {
             'text': CONSTANTS.RESPONSES.TICKET_LIST,
@@ -269,15 +311,13 @@ function listTickets(message, bot)
     });
 }
 
-function finishTicket(message, bot)
-{
-    if(Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_TICKETID) == -1)
-    {
+function finishTicket(message, bot) {
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_TICKETID) == -1) {
         bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_FOUND);
         return;
     }
 
-    let ticketID = message.entities.wit_ticketID[0].value;
+    let ticketID = message.entities[CONSTANTS.INTENTS.WIT_TICKETID][0].value;
 
     Ticket.getTicket(ticketID).then((ticket) => {
         Member.getMemberProgress(message.user).then((res) => {
@@ -307,15 +347,13 @@ function finishTicket(message, bot)
     });
 }
 
-function showTicketProgress(message, bot)
-{
-    if(Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER) == -1)
-    {
+function showTicketProgress(message, bot) {
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER) == -1) {
         bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_MISSING);
         return;
     }
 
-    Member.getMemberProgress(message.entities.wit_member[0].value).then((res) => {
+    Member.getMemberProgress(message.entities[CONSTANTS.INTENTS.WIT_MEMBER][0].value).then((res) => {
         Ticket.getTickets().then((totalTickets) => {
             let progress = 0;
             let fulfilledTickets = res.tickets;
@@ -332,10 +370,9 @@ function showTicketProgress(message, bot)
     });
 }
 
-function finishSuggestedTickets(message, bot)
-{
+function finishSuggestedTickets(message, bot) {
     Member.getMember(message.user).then((user) => {
-        user.suggestedTickets.forEach(function(ticketId) {
+        user.suggestedTickets.forEach(function (ticketId) {
             Member.addFinishedTicket(message.user, ticketId);
             Member.removeSuggestedTicket(message.user, ticketId);
         });
