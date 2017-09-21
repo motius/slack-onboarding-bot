@@ -41,10 +41,11 @@ class AdminClass {
      *
      * @param {String} name - The name of the admin slot.
      * @param {String} userId - The username of the admin slot.
+     * @param {String} channel - The name of the channel where the bo checks for admins.
      * @return {Promise}
      */
-    static addAdmin(name, userId) {
-        return admin.create({name: name, userId: userId});
+    static addAdmin(name, userId, channel) {
+        return admin.create({name: name, userId: userId, channel: channel});
     }
 
     /**
@@ -65,7 +66,6 @@ class AdminClass {
     static getChannel() {
         return admin.find({}, 'channel', function (err, res) {
             if (err) console.log('error occured in the database');
-            console.log(res);
         });
     }
 
@@ -74,13 +74,13 @@ class AdminClass {
      * Get the channel of the admins users.
      *
      * @param {String} userId - The admin changing the channel.
-     * @param {String} channelId - The name of the channel where the bo checks for admins.
+     * @param {String} channel - The name of the channel where the bo checks for admins.
      * @return {Promise}
      */
-    static setChannel(userId, channelId) {
+    static setChannel(userId, channel) {
         return admin.findOneAndUpdate({
             userId: userId,
-        }, {$set: {channel: channelId}});
+        }, {$set: {channel: channel}});
     }
 
     /**

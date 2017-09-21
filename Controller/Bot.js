@@ -8,9 +8,9 @@ const Response = require('../Responses');
 const logger = require("winston").loggers.get('bot');
 const cron = require('node-cron');
 const Ticket = require('../Models/TicketClass');
+const Admin = require("../Models/AdminClass.js");
 
 let wit = null;
-
 function setWit(init) {
     wit = init;
 }
@@ -381,7 +381,6 @@ function startMember(message, bot) {
 }
 
 module.exports.userBot = (controller, client) => {
-
     setWit(client);
     controller.middleware.receive.use(client.receive);
     controller.on('bot_channel_join', function (bot, message) {
@@ -406,6 +405,23 @@ module.exports.userBot = (controller, client) => {
      });
      */
     controller.hears(['change_channel'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
+        let channel = message.text.substr(message.text.indexOf(":") + 1);
+        logger.debug("MESSAGE", message);
+        channel = channel.trim();
+        Admin.getAdmin(message.user).then((res) => {
+            // if (res[0]) {
+            Admin.setChannel('U0ESRG2UV', channel).then((res) => {
+
+                console.log(res);
+            }).catch((err) => {
+                console.log(err);
+            });
+            // } else {
+            //     bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+            // }
+        }).catch((err) => {
+            logger.debug("ERROR CHANNEL", err);
+        });
 
     });
 
