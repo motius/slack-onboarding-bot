@@ -23,10 +23,11 @@ class AdminClass {
     static createDBSchemes(mongoose, db) {
         let mongoSchema = mongoose.Schema({
             name: String,
-            username: {
+            userId: {
                 type: String,
                 unique: true
-            }
+            },
+            channel: String
         });
 
         mongoSchema.query.byUsername = function (username) {
@@ -39,21 +40,57 @@ class AdminClass {
      * Adds an Admin.
      *
      * @param {String} name - The name of the admin slot.
-     * @param {String} username - The username of the admin slot.
+     * @param {String} userId - The username of the admin slot.
      * @return {Promise}
      */
-    static addAdmin(name, username) {
-        return admin.create({name: name, username: username});
+    static addAdmin(name, userId) {
+        return admin.create({name: name, userId: userId});
+    }
+
+    /**
+     * Gets an Admin.
+     *
+     * @param {String} userId - The name of the admin slot.
+     * @return {Promise}
+     */
+    static getAdmin(userId) {
+        return admin.findOne({userId: userId});
+    }
+
+    /**
+     * Get the channel of the admins users.
+     *
+     * @return {Promise}
+     */
+    static getChannel() {
+        return admin.find({}, 'channel', function (err, res) {
+            if (err) console.log('error occured in the database');
+            console.log(res);
+        });
+    }
+
+
+    /**
+     * Get the channel of the admins users.
+     *
+     * @param {String} userId - The admin changing the channel.
+     * @param {String} channelId - The name of the channel where the bo checks for admins.
+     * @return {Promise}
+     */
+    static setChannel(userId, channelId) {
+        return admin.findOneAndUpdate({
+            userId: userId,
+        }, {$set: {channel: channelId}});
     }
 
     /**
      * Removes an admin.
      *
-     * @param {String} username - The username of the admin slot.
+     * @param {String} userId - The username of the admin slot.
      * @return {Promise}
      */
-    static removeAdmin(username) {
-        return admin.remove({username: username}, function (err) {
+    static removeAdmin(userId) {
+        return admin.remove({userId: userId}, function (err) {
             if (err) console.log("Remove Admin ERROR ", err);
             // removed!
         });

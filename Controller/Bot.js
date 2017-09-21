@@ -236,7 +236,7 @@ function addTicket(message, bot) {
         bot.reply(message, CONSTANTS.RESPONSES.TICKET_EMPTY);
         return;
     }
-
+    logger.debug("ADD TICKET", message.entities[CONSTANTS.INTENTS.WIT_TICKET].value);
     Ticket.addTicket(message.entities[CONSTANTS.INTENTS.WIT_TICKET].value, message.entities[CONSTANTS.INTENTS.WIT_PRIORITY].value).then((res) => {
         bot.reply(message, CONSTANTS.RESPONSES.ADD_TICKET_SUCCESS);
     }).catch((err) => {
@@ -252,7 +252,7 @@ function prepareMember(message, bot) {
         return;
     }
     let user = message.entities[CONSTANTS.INTENTS.WIT_MEMBER][0].value.match(CONSTANTS.REGEXES.userIdRegex);
-
+    logger.debug("PREPARE USER", user[1]);
     bot.api.users.info({user: user[1]}, (error, response) => {
         let {id, name, real_name, profile} = response.user;
         Member.addMember(id, real_name, name, profile.email, message.entities[CONSTANTS.INTENTS.WIT_MEMBER_TYPE][0].value).then((res) => {
@@ -264,6 +264,7 @@ function prepareMember(message, bot) {
 }
 
 function listTickets(message, bot) {
+    logger.debug("LIST TICKETS");
     Ticket.getTickets().then((res) => {
         let tickets = {
             'text': CONSTANTS.RESPONSES.TICKET_LIST,
@@ -289,6 +290,8 @@ function finishTicket(message, bot) {
     }
 
     let ticketID = message.entities[CONSTANTS.INTENTS.WIT_TICKETID][0].value;
+
+    logger.debug("FINISH TICKET", ticketID);
 
     Ticket.getTicket(ticketID).then((ticket) => {
         Member.getMemberProgress(message.user).then((res) => {
@@ -324,6 +327,7 @@ function showTicketProgress(message, bot) {
         return;
     }
 
+    logger.debug("SHOW TICKET PROGRESS");
     Member.getMemberProgress(message.entities[CONSTANTS.INTENTS.WIT_MEMBER][0].value).then((res) => {
         Ticket.getTickets().then((totalTickets) => {
             let progress = 0;
@@ -342,6 +346,7 @@ function showTicketProgress(message, bot) {
 }
 
 function finishSuggestedTickets(message, bot) {
+    logger.debug("FINISH SUGGESTED TICKET");
     Member.getMember(message.user).then((user) => {
         user.suggestedTickets.forEach(function (ticketId) {
             Member.addFinishedTicket(message.user, ticketId);
@@ -356,6 +361,7 @@ function finishSuggestedTickets(message, bot) {
 function startMember(message, bot) {
     let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
     Response.addReply(message.text);
+    logger.debug("START MEMBER", members[1]);
     CoreMember.startMemberOnboarding(members[1]).then((res) => {
 
         if (res == null) {
@@ -399,9 +405,13 @@ module.exports.userBot = (controller, client) => {
      bot.reply(message, reply_with_attachments);
      });
      */
+    controller.hears(['change_channel'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
+
+    });
 
     controller.hears(['robot'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
         let event = message.text.substr(message.text.indexOf(":") + 1);
+        console.log("HERE")
         SocketServer.sendCommand(event);
     });
 
@@ -466,7 +476,7 @@ module.exports.userBot = (controller, client) => {
 
     });
 
-    controller.hears(['test'], ['direct_message'], function (bot, message) {
+    controller.hears(['\.*'], ['direct_message'], function (bot, message) {
         witProcessMessage(bot, message);
     })
 };
