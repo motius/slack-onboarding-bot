@@ -409,16 +409,17 @@ module.exports.userBot = (controller, client) => {
         logger.debug("MESSAGE", message);
         channel = channel.trim();
         Admin.getAdmin(message.user).then((res) => {
-            // if (res[0]) {
-            Admin.setChannel('U0ESRG2UV', channel).then((res) => {
+            if (res[0]) {
+                Admin.setChannel(message.user, channel).then((res) => {
 
-                console.log(res);
-            }).catch((err) => {
-                console.log(err);
-            });
-            // } else {
-            //     bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
-            // }
+                    bot.reply(message, "Successfully changed the Admins channel!");
+                    console.log(res);
+                }).catch((err) => {
+                    console.log(err);
+                });
+            } else {
+                bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+            }
         }).catch((err) => {
             logger.debug("ERROR CHANNEL", err);
         });
@@ -427,7 +428,6 @@ module.exports.userBot = (controller, client) => {
 
     controller.hears(['robot'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
         let event = message.text.substr(message.text.indexOf(":") + 1);
-        console.log("HERE")
         SocketServer.sendCommand(event);
     });
 
