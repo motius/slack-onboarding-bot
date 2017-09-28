@@ -10,6 +10,9 @@ const cron = require('node-cron');
 const Ticket = require('../Models/TicketClass');
 const Admin = require("../Models/AdminClass.js");
 
+const jobTime = "*/10 * * * * *";
+
+
 let wit = null;
 function setWit(init) {
     wit = init;
@@ -28,7 +31,7 @@ function startOnBoarding(bot, message, user) {
                 user: user.userId,
                 channel: res.channel.id
             }, function (err, convo) {
-                task = cron.schedule("*/30 * * * * *", function () {
+                task = cron.schedule(jobTime, function () {
                     convo.repeat();
                     convo.next();
                 }, false);
@@ -56,19 +59,19 @@ function startOnBoarding(bot, message, user) {
                                     if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.CONFIRMATION) !== -1) {
                                         ticketsDelivery(bot, message, user.userId, res.channel.id);
                                         task.destroy();
+                                        convo.next();
                                     } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
                                         logger.debug("Utils ", "help");
+                                        // bot.reply(message, CONSTANTS.RESPONSES.HELP);
                                         convo.say(CONSTANTS.RESPONSES.HELP);
                                         task.start();
                                         // task.destroy();
                                     } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.STOP) !== -1) {
                                         convo.say(CONSTANTS.RESPONSES.STOP);
-
                                         task.start();
                                     }
                                 }
                             });
-                            convo.next();
                         }
                     }
                 ], {}, 'default');
@@ -108,7 +111,7 @@ function ticketsDelivery(bot, message, userId, channelId) {
             user: userId,
             channel: channelId
         }, function (err, convo) {
-            task = cron.schedule("*/30 * * * * *", function () {
+            task = cron.schedule(jobTime, function () {
                 if (counter > 4) {
                     task.destroy();
                 }
