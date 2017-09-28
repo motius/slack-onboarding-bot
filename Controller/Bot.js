@@ -418,12 +418,10 @@ module.exports.userBot = (controller, client) => {
         let channel = message.text.substr(message.text.indexOf(":") + 1);
         logger.debug("CHANNEL CHANGE", message);
         channel = channel.trim();
-        Admin.getAdmin("U0ESRG2UV").then((res) => {
-            // logger.debug("ADMIN", res);
-            console.log("ADMIN", res);
-            if (res[0]) {
+        Admin.getAdmin(message.user).then((res) => {
+            logger.debug("ADMIN", res);
+            if (res) {
                 Admin.setChannel(message.user, channel).then((res) => {
-
                     bot.reply(message, "Successfully changed the Admins channel!");
                     console.log(res);
                 }).catch((err) => {
