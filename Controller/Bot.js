@@ -240,6 +240,7 @@ function addTicket(message, bot) {
     Ticket.addTicket(message.entities[CONSTANTS.INTENTS.WIT_TICKET].value, message.entities[CONSTANTS.INTENTS.WIT_PRIORITY].value).then((res) => {
         bot.reply(message, CONSTANTS.RESPONSES.ADD_TICKET_SUCCESS);
     }).catch((err) => {
+        logger.debug("ADD TICKET FAIL [ERROR]", err);
         bot.reply(message, CONSTANTS.RESPONSES.ADD_TICKET_FAIL);
     });
 }
@@ -258,6 +259,7 @@ function prepareMember(message, bot) {
         Member.addMember(id, real_name, name, profile.email, message.entities[CONSTANTS.INTENTS.WIT_MEMBER_TYPE][0].value).then((res) => {
             bot.reply(message, CONSTANTS.RESPONSES.PREPARE_SUCCESS);
         }).catch((err) => {
+            logger.debug("PREPARE FAIL [ERROR]", err);
             bot.reply(message, CONSTANTS.RESPONSES.PREPARE_FAIL);
         });
     });
@@ -314,6 +316,7 @@ function finishTicket(message, bot) {
                 Member.removeSuggestedTicket(message.user, ticketID);
             }
         }).catch((err) => {
+            logger.debug("FINISH TICKET FAIL [ERROR]", err);
             bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_FOUND);
         });
     }).catch((err) => {
@@ -340,8 +343,8 @@ function showTicketProgress(message, bot) {
             logger.debug(err);
         })
     }).catch((err) => {
+        logger.debug("TICKET PROGRESS FAIL [ERROR]", err);
         bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_NOT_FOUND_IN_DATABASE);
-        logger.debug(err);
     });
 }
 
@@ -353,8 +356,8 @@ function finishSuggestedTickets(message, bot) {
             Member.removeSuggestedTicket(message.user, ticketId);
         });
     }).catch((err) => {
+        logger.debug("FINISH SUGGESTED FAIL [ERROR]", err);
         bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_NOT_FOUND_IN_DATABASE);
-        logger.debug(err);
     });
 }
 
@@ -376,6 +379,7 @@ function startMember(message, bot) {
             }
         }
     }).catch((err) => {
+        logger.debug("START FAIL [ERROR]", err);
         bot.reply(message, CONSTANTS.RESPONSES.DEFAULT);
     });
 }
