@@ -22,7 +22,7 @@ function startOnBoarding(bot, message, user) {
             bot.botkit.log('Failed to open IM with user', err)
         }
         let task;
-        logger.debug(res);
+        logger.debug("ONBOARDING ", res);
         bot.startConversation(
             {
                 user: user.userId,
@@ -367,6 +367,7 @@ function startMember(message, bot) {
     logger.debug("START MEMBER", members[1]);
     CoreMember.startMemberOnboarding(members[1]).then((res) => {
 
+        logger.debug("MEMBER START", res);
         if (res == null) {
             bot.reply(message, CONSTANTS.RESPONSES.NOT_PREPARED);
         } else {
@@ -375,7 +376,7 @@ function startMember(message, bot) {
             try {
                 startOnBoarding(bot, message, res);
             } catch (e) {
-                logger.info(e)
+                logger.debug("[ERROR]", e)
             }
         }
     }).catch((err) => {
