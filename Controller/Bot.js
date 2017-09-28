@@ -416,7 +416,7 @@ module.exports.userBot = (controller, client) => {
      */
     controller.hears(['change_channel'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
         let channel = message.text.substr(message.text.indexOf(":") + 1);
-        logger.debug("MESSAGE", message);
+        logger.debug("CHANNEL CHANGE", message);
         channel = channel.trim();
         Admin.getAdmin(message.user).then((res) => {
             if (res[0]) {
