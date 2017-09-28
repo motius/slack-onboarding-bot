@@ -59,6 +59,7 @@ function startOnBoarding(bot, message, user) {
                                     } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
                                         logger.debug("Utils ", "help");
                                         convo.say(CONSTANTS.RESPONSES.HELP);
+                                        task.start();
                                         // task.destroy();
                                     } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.STOP) !== -1) {
                                         convo.say(CONSTANTS.RESPONSES.STOP);
