@@ -193,7 +193,7 @@ function witProcessMessage(bot, message) {
         } else {
             logger.debug("RESPONSE:", Object.keys(message.entities));
 
-            if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT) !== -1) {
+            if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT.default) !== -1) {
                 switch (message.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value) {
                     case CONSTANTS.INTENTS.TICKET_INTENT.set:
                         addTicket(message, bot);
