@@ -226,6 +226,7 @@ function witProcessMessage(bot, message) {
                             break;
                     }
                 }).catch((err) => {
+                    logger.debug("[ERROR]", err);
                     bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
                 });
 
