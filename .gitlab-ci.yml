@@ -65,10 +65,10 @@ logs:
 export:
     stage: deploy
     script:
-        - docker-compose exec -T db mongodump --db test --out - | tar > collectiondump.tar.gz
+        - docker-compose exec -T db mongodump --db test --out - | tar -cv > collectiondump.tar
     artifacts:
         paths:
-            - collectiondump.tar.gz
+            - collectiondump.tar
     when: manual
     tags:
         - staging
