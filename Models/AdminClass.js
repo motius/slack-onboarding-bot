@@ -49,7 +49,7 @@ class AdminClass {
     }
 
     /**
-     * Gets an Admin.
+     * Gets an Admin user.
      *
      * @param {String} userId - The name of the admin slot.
      * @return {Promise}

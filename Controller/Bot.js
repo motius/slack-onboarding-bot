@@ -194,7 +194,7 @@ function witProcessMessage(bot, message) {
         } else {
             logger.debug("RESPONSE:", Object.keys(message.entities));
 
-            if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT.default) !== -1) {
+            if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT.default) !== -1) { //check if there is a ticket intent
                 switch (message.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value) {
                     case CONSTANTS.INTENTS.TICKET_INTENT.set:
                         addTicket(message, bot);
@@ -214,7 +214,7 @@ function witProcessMessage(bot, message) {
                     default:
                         break;
                 }
-            } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.MEMBER_INTENT.default) !== -1) {
+            } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.MEMBER_INTENT.default) !== -1) { //check if there is a member intent
                 Utils.checkUser(bot, message.user).then((permission) => {
                     switch (message.entities[CONSTANTS.INTENTS.MEMBER_INTENT.default][0].value) {
                         case CONSTANTS.INTENTS.MEMBER_INTENT.prepare:
@@ -231,11 +231,21 @@ function witProcessMessage(bot, message) {
                     bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
                 });
 
+            } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.RUDE) !== -1) {  //check if the user was rude
+
+            } else { //default response
+
             }
         }
     });
 }
 
+/**
+ * Add ticket to the DB.
+ *
+ * @param message - the message received from the bot controller.
+ * @param {Bot} bot - instance of the bot.
+ */
 function addTicket(message, bot) {
     // Check if there is actually a ticket to add
     if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_TICKET) == -1 ||
@@ -252,6 +262,12 @@ function addTicket(message, bot) {
     });
 }
 
+/**
+ * Prepare a member. Add an instance of the prepared member to the DB so they can be started.
+ *
+ * @param message - the message received from the bot controller.
+ * @param {Bot} bot - instance of the bot.
+ */
 function prepareMember(message, bot) {
     // Check if there actually is a member
     if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER) == -1 ||
@@ -272,6 +288,12 @@ function prepareMember(message, bot) {
     });
 }
 
+/**
+ * List all the tickets added to the DB
+ *
+ * @param message - the message received from the bot controller.
+ * @param {Bot} bot - instance of the bot.
+ */
 function listTickets(message, bot) {
     logger.debug("LIST TICKETS");
     Ticket.getTickets().then((res) => {
@@ -292,6 +314,12 @@ function listTickets(message, bot) {
     });
 }
 
+/**
+ * Mark one or more tickets and done
+ *
+ * @param message - the message received from the bot controller.
+ * @param {Bot} bot - instance of the bot.
+ */
 function finishTicket(message, bot) {
     if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_TICKETID) == -1) {
         bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_FOUND);
@@ -331,6 +359,12 @@ function finishTicket(message, bot) {
     });
 }
 
+/**
+ * Show the tickets progress of a user
+ *
+ * @param message - the message received from the bot controller.
+ * @param {Bot} bot - instance of the bot.
+ */
 function showTicketProgress(message, bot) {
     if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER) == -1) {
         bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_MISSING);
@@ -368,7 +402,14 @@ function finishSuggestedTickets(message, bot) {
     });
 }
 
+/**
+ * Start the onboarding of a user
+ *
+ * @param message - the message received from the bot controller.
+ * @param {Bot} bot - instance of the bot.
+ */
 function startMember(message, bot) {
+    let user = message.entities[CONSTANTS.INTENTS.WIT_MEMBER][0].value.match(CONSTANTS.REGEXES.userIdRegex);
     let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
     Response.addReply(message.text);
     logger.debug("START MEMBER", members[1]);
@@ -394,8 +435,9 @@ function startMember(message, bot) {
 
 module.exports.userBot = (controller, client) => {
     setWit(client);
-    controller.middleware.receive.use(client.receive);
-    controller.on('bot_channel_join', function (bot, message) {
+    controller.middleware.receive.use(client.receive); //integrate wit.ai to listen to all messages sent to the bot
+
+    controller.on('bot_channel_join', function (bot, message) { //Greeting when bot is added to channel
         bot.reply(message, "I'm here!")
     });
 
@@ -416,6 +458,8 @@ module.exports.userBot = (controller, client) => {
      bot.reply(message, reply_with_attachments);
      });
      */
+
+    //command to change the channel where the bot will check for admin permission
     controller.hears(['change_channel'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
         let channel = message.text.substr(message.text.indexOf(":") + 1);
         logger.debug("CHANNEL CHANGE", message);
@@ -424,10 +468,10 @@ module.exports.userBot = (controller, client) => {
             logger.debug("ADMIN", res);
             if (res) {
                 Admin.setChannel(message.user, channel).then((res) => {
-                    bot.reply(message, "Successfully changed the Admins channel!");
-                    console.log(res);
+                    bot.reply(message, CONSTANTS.RESPONSES.SUCCESS);
+                    logger.debug("CHANNEL", res);
                 }).catch((err) => {
-                    console.log(err);
+                    logger.debug("[ERROR]", err);
                 });
             } else {
                 bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
@@ -438,6 +482,7 @@ module.exports.userBot = (controller, client) => {
 
     });
 
+    //send commands to the socket server
     controller.hears(['robot'], ['ambient', 'direct_message', 'direct_mention', 'mention'], function (bot, message) {
         let event = message.text.substr(message.text.indexOf(":") + 1);
         SocketServer.sendCommand(event);
@@ -504,6 +549,7 @@ module.exports.userBot = (controller, client) => {
 
     });
 
+    //All messages send to the bot will go through here
     controller.hears(['\.*'], ['direct_message'], function (bot, message) {
         witProcessMessage(bot, message);
     })
