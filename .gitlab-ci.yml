@@ -16,7 +16,7 @@ variables:
 prepare:clean:
    stage: prepare
    script:
-       - docker-compose down --remove-orphans -v
+       - docker-compose rm -f
    allow_failure: true
    only:
        - master
@@ -65,46 +65,17 @@ logs:
 export:
     stage: deploy
     script:
-        - docker-compose exec -T db mongoexport --db test --collection tickets > export.json
+        - docker-compose exec -T db mongoexport --db test --collection tickets > tickets.json
+        - docker-compose exec -T db mongoexport --db test --collection admins > admins.json
+        - docker-compose exec -T db mongoexport --db test --collection responses > responses.json
+        - docker-compose exec -T db mongoexport --db test --collection users > users.json
     artifacts:
         paths:
-            - export.json
+            - tickets.json
+            - admins.json
+            - responses.json
+            - users.json
     when: manual
     tags:
         - staging
- 
- export:
-    stage: deploy
-    script:
-        - docker-compose exec -T db mongoexport --db test --collection admins > export.json
-    artifacts:
-        paths:
-            - export.json
-    when: manual
-    tags:
-        - staging
-
- export:
-    stage: deploy
-    script:
-        - docker-compose exec -T db mongoexport --db test --collection responses > export.json
-    artifacts:
-        paths:
-            - export.json
-    when: manual
-    tags:
-        - staging
-    
-
- export:
-    stage: deploy
-    script:
-        - docker-compose exec -T db mongoexport --db test --collection users > export.json
-    artifacts:
-        paths:
-            - export.json
-    when: manual
-    tags:
-        - staging
- 
  
