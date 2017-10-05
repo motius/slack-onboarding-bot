@@ -65,12 +65,46 @@ logs:
 export:
     stage: deploy
     script:
-        - mkdir dump
-        - docker-compose exec -T db mongodump --db test --out dump
+        - docker-compose exec -T db mongoexport --db test --collection tickets > export.json
     artifacts:
         paths:
-            - dump/
+            - export.json
     when: manual
     tags:
         - staging
+ 
+ export:
+    stage: deploy
+    script:
+        - docker-compose exec -T db mongoexport --db test --collection admins > export.json
+    artifacts:
+        paths:
+            - export.json
+    when: manual
+    tags:
+        - staging
+
+ export:
+    stage: deploy
+    script:
+        - docker-compose exec -T db mongoexport --db test --collection responses > export.json
+    artifacts:
+        paths:
+            - export.json
+    when: manual
+    tags:
+        - staging
+    
+
+ export:
+    stage: deploy
+    script:
+        - docker-compose exec -T db mongoexport --db test --collection users > export.json
+    artifacts:
+        paths:
+            - export.json
+    when: manual
+    tags:
+        - staging
+ 
  
