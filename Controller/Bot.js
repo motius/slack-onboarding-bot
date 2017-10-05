@@ -11,6 +11,7 @@ const Ticket = require('../Models/TicketClass');
 const Admin = require("../Models/AdminClass.js");
 
 const jobTime = "*/10 * * * * *";
+const iterations = 4;
 
 
 let wit = null;
@@ -112,7 +113,7 @@ function ticketsDelivery(bot, message, userId, channelId) {
             channel: channelId
         }, function (err, convo) {
             task = cron.schedule(jobTime, function () {
-                if (counter > 4) {
+                if (counter > iterations) {
                     task.destroy();
                 }
                 string.text = CONSTANTS.RESPONSES.REMINDER[counter];
@@ -169,7 +170,7 @@ function ticketsDelivery(bot, message, userId, channelId) {
                                     task.start();
                                 } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.STOP) !== -1) {
                                     convo.say("TEST");
-                                    task.start();
+                                    task.destroy();
                                 }
                             }
                         });
