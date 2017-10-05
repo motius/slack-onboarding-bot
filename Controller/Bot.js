@@ -243,8 +243,8 @@ function addTicket(message, bot) {
         bot.reply(message, CONSTANTS.RESPONSES.TICKET_EMPTY);
         return;
     }
-    logger.debug("ADD TICKET", message.entities[CONSTANTS.INTENTS.WIT_TICKET].value);
-    Ticket.addTicket(message.entities[CONSTANTS.INTENTS.WIT_TICKET].value, message.entities[CONSTANTS.INTENTS.WIT_PRIORITY].value).then((res) => {
+    logger.debug("ADD TICKET", message.entities[CONSTANTS.INTENTS.WIT_TICKET][0].value);
+    Ticket.addTicket(message.entities[CONSTANTS.INTENTS.WIT_TICKET][0].value, message.entities[CONSTANTS.INTENTS.WIT_PRIORITY][0].value).then((res) => {
         bot.reply(message, CONSTANTS.RESPONSES.ADD_TICKET_SUCCESS);
     }).catch((err) => {
         logger.debug("ADD TICKET FAIL [ERROR]", err);
