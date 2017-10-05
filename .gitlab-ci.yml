@@ -65,10 +65,10 @@ logs:
 export:
     stage: deploy
     script:
-        - docker-compose exec -T db mongodump --db test  -o /build/dump
+        - docker-compose exec -T db mongodump --db test  -o /build/dump/
     artifacts:
         paths:
-            - /build/dump
+            - /build/dump/
     when: manual
     tags:
         - staging
