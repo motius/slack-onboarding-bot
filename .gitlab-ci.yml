@@ -68,7 +68,7 @@ export:
         - docker-compose exec -T db mongodump --db test -o /
     artifacts:
         paths:
-            - *.json
+            - /*.json
     when: manual
     tags:
         - staging
