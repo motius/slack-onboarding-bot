@@ -16,7 +16,7 @@ variables:
 prepare:clean:
    stage: prepare
    script:
-       - docker-compose rm -f
+       - docker-compose down --remove-orphans -v
    allow_failure: true
    only:
        - master
