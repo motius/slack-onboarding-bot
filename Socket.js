@@ -4,13 +4,13 @@ const logger = require("winston").loggers.get('socket');
 let server;
 function createServer(PORT) {
     server = ws.createServer(function (conn) {
-        console.log("New connection");
+        logger.info("New connection");
         conn.on("text", function (str) {
-            console.log("Received " + str);
+            logger.debug("Received " + str);
             conn.sendText(str.toUpperCase() + "!!!")
         });
         conn.on("close", function (code, reason) {
-            console.log("Connection closed")
+            logger.info("Connection closed")
         });
     }).listen(PORT);
 }

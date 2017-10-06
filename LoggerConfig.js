@@ -51,7 +51,7 @@ winston.loggers.add('member', {
         console: {
             level: loglevel,
             colorize: true,
-            label: 'server'
+            label: 'member'
         }
     }
 );
@@ -60,7 +60,7 @@ winston.loggers.add('core', {
         console: {
             level: loglevel,
             colorize: true,
-            label: 'server'
+            label: 'core'
         }
     }
 );
@@ -69,7 +69,7 @@ winston.loggers.add('project', {
         console: {
             level: loglevel,
             colorize: true,
-            label: 'server'
+            label: 'project'
         }
     }
 );
@@ -78,7 +78,7 @@ winston.loggers.add('ticket', {
         console: {
             level: loglevel,
             colorize: true,
-            label: 'server'
+            label: 'ticket'
         }
     }
 );
