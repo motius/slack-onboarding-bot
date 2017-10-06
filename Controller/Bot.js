@@ -15,6 +15,7 @@ const iterations = 4;
 
 
 let wit = null;
+
 function setWit(init) {
     wit = init;
 }
@@ -193,6 +194,7 @@ function witProcessMessage(bot, message) {
             logger.debug("ERROR", err);
         } else {
             logger.debug("RESPONSE:", Object.keys(message.entities));
+            Response.addReply(message.text);
 
             if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT.default) !== -1) { //check if there is a ticket intent
                 switch (message.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value) {
@@ -411,7 +413,6 @@ function finishSuggestedTickets(message, bot) {
 function startMember(message, bot) {
     let user = message.entities[CONSTANTS.INTENTS.WIT_MEMBER][0].value.match(CONSTANTS.REGEXES.userIdRegex);
     let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
-    Response.addReply(message.text);
     logger.debug("START MEMBER", members[1]);
     CoreMember.startMemberOnboarding(members[1]).then((res) => {
 
@@ -492,7 +493,6 @@ module.exports.userBot = (controller, client) => {
         Utils.checkUser(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
 
-            Response.addReply(message.text);
             // There has to be a match
             if (members == null) {
                 bot.reply(message, CONSTANTS.RESPONSES.PREPARE_MEMBER_NO_MEMBER_ENTERED);
