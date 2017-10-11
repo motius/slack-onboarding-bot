@@ -197,6 +197,7 @@ function witProcessMessage(bot, message) {
             Response.addReply(message.text);
 
             if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT.default) !== -1) { //check if there is a ticket intent
+                logger.debug("TICKET INTENT:", message.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value);
                 switch (message.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value) {
                     case CONSTANTS.INTENTS.TICKET_INTENT.set:
                         addTicket(message, bot);
@@ -218,6 +219,7 @@ function witProcessMessage(bot, message) {
                 }
             } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.MEMBER_INTENT.default) !== -1) { //check if there is a member intent
                 Utils.checkUser(bot, message.user).then((permission) => {
+                    logger.debug("MEMBER INTENT:", message.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value);
                     switch (message.entities[CONSTANTS.INTENTS.MEMBER_INTENT.default][0].value) {
                         case CONSTANTS.INTENTS.MEMBER_INTENT.prepare:
                             prepareMember(message, bot);

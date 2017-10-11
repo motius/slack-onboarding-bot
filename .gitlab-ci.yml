@@ -11,12 +11,12 @@ variables:
    COMPOSE_PROJECT_NAME: $CI_PROJECT_NAME-$CI_BUILD_REF_NAME
    VIRTUAL_HOST: $CI_PROJECT_NAME.staging.motius.de
 # ---------------------------------------------------------------------------------------------- #
-# ---------------------------------------- CLEAN ----------------------------------------------- #
+# ---------------------------------------- CLEAN ----------------------------------------------- #  down --remove-orphans -v
 # ---------------------------------------------------------------------------------------------- #
 prepare:clean:
    stage: prepare
    script:
-       - docker-compose down --remove-orphans -v
+       - docker-compose rm -f
    allow_failure: true
    only:
        - master
