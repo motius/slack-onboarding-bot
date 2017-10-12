@@ -10,7 +10,7 @@ const cron = require('node-cron');
 const Ticket = require('../Models/TicketClass');
 const Admin = require("../Models/AdminClass.js");
 
-const jobTime = "*/10 * * * * *";
+const jobTime = "*/30 * * * * *";
 const iterations = 4;
 
 
@@ -159,10 +159,10 @@ function ticketsDelivery(bot, message, userId, channelId) {
                                                 convo.next();
                                             } else {
                                                 task.start();
-                                                convo.say(string);
+                                                // convo.say(string);
                                                 // convo.say("Hey, {{vars.object.text}}: \n {{#vars.object.attachments}}{{/vars.object.attachments}}");
-                                                convo.repeat();
-                                                convo.next();
+                                                // convo.repeat();
+                                                // convo.next();
                                             }
                                         });
                                     }
