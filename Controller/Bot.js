@@ -169,9 +169,11 @@ function ticketsDelivery(bot, message, userId, channelId) {
                                     }
                                 } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
                                     logger.debug("Utils ", "help");
+                                    convo.say("HELP");
                                     task.start();
                                 } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.STOP) !== -1) {
-                                    convo.say("TEST");
+                                    convo.say("STOPPED");
+                                    convo.next();
                                     task.destroy();
                                 }
                             }
