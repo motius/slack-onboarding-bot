@@ -82,26 +82,26 @@ function startOnBoarding(bot, message, user) {
 }
 
 function ticketsDelivery(bot, message, userId, channelId) {
-    let tickets = [], string, length, task, counter = 0;
+    let items = [], string, length, task, counter = 0;
 
-    Ticket.getTickets().then((totalTickets) => {
+    Ticket.getTickets().then((totalitems) => {
 
         let updateTickets = function (index) {
             length = 0;
-            tickets = tickets.concat(totalTickets.slice(0, index));
-            totalTickets = totalTickets.slice(index);
-            logger.debug(totalTickets);
+            items = items.concat(totalitems.slice(0, index));
+            totalitems = totalitems.slice(index);
+            logger.debug(totalitems);
             string = {
                 'text': 'Hey, here are a few things you need to know. ',
                 'attachments': [],
                 // 'icon_url': 'http://lorempixel.com/48/48'
             };
-            tickets.forEach(function (ticket, i) {
+            items.forEach(function (item, i) {
                 string.attachments[i] = {'color': '#4285F4'};
-                string.attachments[i].title = ticket.ticketData + "  (" + ticket.ticketId + ")" + "\n";
+                string.attachments[i].title = item.ticketData + "  (" + item.ticketId + ")" + "\n";
                 length++;
             });
-            Member.addSuggestedTicket(userId, tickets.map((t) => {
+            Member.addSuggestedTicket(userId, items.map((t) => {
                 return t.ticketId;
             }));
 
@@ -142,20 +142,20 @@ function ticketsDelivery(bot, message, userId, channelId) {
                             } else {
                                 Response.addReply(response.text);
                                 logger.debug("RESPONSE:", Object.keys(response.entities));
-                                if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT.default) !== -1) {
+                                if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.ITEM_INTENT.default) !== -1) {
 
-                                    if (response.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value === CONSTANTS.INTENTS.TICKET_INTENT.finish) {
-                                        response.entities[CONSTANTS.INTENTS.WIT_TICKETID].forEach(function (t) {
+                                    if (response.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value === CONSTANTS.INTENTS.ITEM_INTENT.finish) {
+                                        response.entities[CONSTANTS.INTENTS.WIT_ITEM_ID].forEach(function (t) {
 
-                                            tickets = tickets.filter(function (ticket) {
-                                                return ticket.ticketId != t.value;
+                                            items = items.filter(function (item) {
+                                                return item.ticketId != t.value;
                                             });
 
-                                            updateTickets(length - tickets.length);
+                                            updateTickets(length - items.length);
                                             counter = 0;
                                             Member.addFinishedTicket(userId, t.value);
                                             Member.removeSuggestedTicket(userId, t.value);
-                                            if (tickets.length < 0) {
+                                            if (items.length < 0) {
                                                 convo.next();
                                             } else {
                                                 task.start();
@@ -196,19 +196,19 @@ function witProcessMessage(bot, message) {
             logger.debug("RESPONSE:", Object.keys(message.entities));
             Response.addReply(message.text);
 
-            if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.TICKET_INTENT.default) !== -1) { //check if there is a ticket intent
-                logger.debug("TICKET INTENT:", message.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value);
-                switch (message.entities[CONSTANTS.INTENTS.TICKET_INTENT.default][0].value) {
-                    case CONSTANTS.INTENTS.TICKET_INTENT.set:
+            if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.ITEM_INTENT.default) !== -1) { //check if there is a item intent
+                logger.debug("ITEM INTENT:", message.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value);
+                switch (message.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value) {
+                    case CONSTANTS.INTENTS.ITEM_INTENT.set:
                         addTicket(message, bot);
                         break;
-                    case CONSTANTS.INTENTS.TICKET_INTENT.list:
+                    case CONSTANTS.INTENTS.ITEM_INTENT.list:
                         listTickets(message, bot);
                         break;
-                    case CONSTANTS.INTENTS.TICKET_INTENT.finish:
+                    case CONSTANTS.INTENTS.ITEM_INTENT.finish:
                         finishTicket(message, bot);
                         break;
-                    case CONSTANTS.INTENTS.TICKET_INTENT.progress:
+                    case CONSTANTS.INTENTS.ITEM_INTENT.progress:
                         showTicketProgress(message, bot);
                         break;
                     case "tickets_finish_suggested":
@@ -245,7 +245,7 @@ function witProcessMessage(bot, message) {
 }
 
 /**
- * Add ticket to the DB.
+ * Add item to the DB.
  *
  * @param message - the message received from the bot controller.
  * @param {Bot} bot - instance of the bot.
@@ -257,12 +257,15 @@ function addTicket(message, bot) {
         bot.reply(message, CONSTANTS.RESPONSES.TICKET_EMPTY);
         return;
     }
-    logger.debug("ADD TICKET", message.entities[CONSTANTS.INTENTS.WIT_TICKET][0].value);
-    Ticket.addTicket(message.entities[CONSTANTS.INTENTS.WIT_TICKET][0].value, message.entities[CONSTANTS.INTENTS.WIT_PRIORITY][0].value).then((res) => {
-        bot.reply(message, CONSTANTS.RESPONSES.ADD_TICKET_SUCCESS);
+    
+    logger.debug("ADD ITEM", message.entities[CONSTANTS.INTENTS.WIT_ITEM][0].value);
+
+    let item = message.entities[CONSTANTS.INTENTS.WIT_ITEM][0].value.replace(/['"]+/g, '');
+    Ticket.addTicket(item, message.entities[CONSTANTS.INTENTS.WIT_MEMBER_TYPE][0].value, message.entities[CONSTANTS.INTENTS.WIT_ITEM_PRIORITY][0].value).then((res) => {
+        bot.reply(message, CONSTANTS.RESPONSES.ADD_ITEM_SUCCESS);
     }).catch((err) => {
-        logger.debug("ADD TICKET FAIL [ERROR]", err);
-        bot.reply(message, CONSTANTS.RESPONSES.ADD_TICKET_FAIL);
+        logger.debug("ADD ITEM FAIL [ERROR]", err);
+        bot.reply(message, CONSTANTS.RESPONSES.ADD_ITEM_FAIL);
     });
 }
 
@@ -293,70 +296,70 @@ function prepareMember(message, bot) {
 }
 
 /**
- * List all the tickets added to the DB
+ * List all the items added to the DB
  *
  * @param message - the message received from the bot controller.
  * @param {Bot} bot - instance of the bot.
  */
 function listTickets(message, bot) {
-    logger.debug("LIST TICKETS");
+    logger.debug("LIST ITEMS");
     Ticket.getTickets().then((res) => {
-        let tickets = {
-            'text': CONSTANTS.RESPONSES.TICKET_LIST,
+        let items = {
+            'text': CONSTANTS.RESPONSES.ITEM_LIST,
             'attachments': []
         };
         res.forEach((t) => {
-            let ticket = {
-                'title': t.ticketData + ' ( ID: ' + t.ticketId + ' )',
+            let item = {
+                'title': t.ticketData + ' with priority ' + t.ticketPriority + ' ( ID: ' + t.ticketId + ' )',
                 'color': '#117ef9',
             };
-            tickets.attachments.push(ticket);
+            items.attachments.push(item);
         });
-        bot.reply(message, tickets);
+        bot.reply(message, items);
     }).catch((err) => {
         logger.debug(err);
     });
 }
 
 /**
- * Mark one or more tickets and done
+ * Mark one or more items and done
  *
  * @param message - the message received from the bot controller.
  * @param {Bot} bot - instance of the bot.
  */
 function finishTicket(message, bot) {
-    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_TICKETID) == -1) {
-        bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_FOUND);
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM_ID) == -1) {
+        bot.reply(message, CONSTANTS.RESPONSES.FINISH_ITEM_NOT_FOUND);
         return;
     }
 
-    let ticketID = message.entities[CONSTANTS.INTENTS.WIT_TICKETID][0].value;
+    let itemID = message.entities[CONSTANTS.INTENTS.WIT_ITEM_ID][0].value;
 
-    logger.debug("FINISH TICKET", ticketID);
+    logger.debug("FINISH ITEM", itemID);
 
-    Ticket.getTicket(ticketID).then((ticket) => {
+    Ticket.getTicket(itemID).then((item) => {
         Member.getMemberProgress(message.user).then((res) => {
-            let fullfilledTickets = res.tickets;
+            let fullfilleditems = res.tickets;
             let alreadyChecked = false;
 
-            for (i = 0; i < fulfilledTickets.length; i++) {
-                if (fulfilledTickets[i].ticketId == ids[1]) {
+            for (i = 0; i < fulfilleditems.length; i++) {
+                if (fulfilleditems[i].ticketId == ids[1]) {
                     alreadyChecked = true;
                     break;
                 }
             }
 
             if (alreadyChecked) {
-                bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_ALREADY_FINISHED);
+                bot.reply(message, CONSTANTS.RESPONSES.FINISH_ITEM_ALREADY_FINISHED);
             }
             else {
-                bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_YET_FINISHED);
-                Member.addFinishedTicket(message.user, ticketID);
-                Member.removeSuggestedTicket(message.user, ticketID);
+                bot.reply(message, CONSTANTS.RESPONSES.FINISH_ITEM_NOT_YET_FINISHED);
+                Member.addFinishedTicket(message.user, itemID);
+                Member.removeSuggestedTicket(message.user, itemID);
             }
         }).catch((err) => {
-            logger.debug("FINISH TICKET FAIL [ERROR]", err);
-            bot.reply(message, CONSTANTS.RESPONSES.FINISH_TICKET_NOT_FOUND);
+            logger.debug("FINISH ITEM FAIL [ERROR]", err);
+            bot.reply(message, CONSTANTS.RESPONSES.FINISH_ITEM_NOT_FOUND);
         });
     }).catch((err) => {
         logger.debug(err);
@@ -364,7 +367,7 @@ function finishTicket(message, bot) {
 }
 
 /**
- * Show the tickets progress of a user
+ * Show the items progress of a user
  *
  * @param message - the message received from the bot controller.
  * @param {Bot} bot - instance of the bot.
@@ -375,30 +378,30 @@ function showTicketProgress(message, bot) {
         return;
     }
 
-    logger.debug("SHOW TICKET PROGRESS");
+    logger.debug("SHOW ITEM PROGRESS");
     Member.getMemberProgress(message.entities[CONSTANTS.INTENTS.WIT_MEMBER][0].value).then((res) => {
-        Ticket.getTickets().then((totalTickets) => {
+        Ticket.getTickets().then((totalitems) => {
             let progress = 0;
-            let fulfilledTickets = res.tickets;
+            let fulfilleditems = res.tickets;
 
-            progress = (fulfilledTickets.length / totalTickets.length) * 100;
+            progress = (fulfilleditems.length / totalitems.length) * 100;
 
             bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_REPLY + progress + "%");
         }).catch((err) => {
             logger.debug(err);
         })
     }).catch((err) => {
-        logger.debug("TICKET PROGRESS FAIL [ERROR]", err);
+        logger.debug("ITEM PROGRESS FAIL [ERROR]", err);
         bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_MEMBER_NOT_FOUND_IN_DATABASE);
     });
 }
 
 function finishSuggestedTickets(message, bot) {
-    logger.debug("FINISH SUGGESTED TICKET");
+    logger.debug("FINISH SUGGESTED ITEM");
     Member.getMember(message.user).then((user) => {
-        user.suggestedTickets.forEach(function (ticketId) {
-            Member.addFinishedTicket(message.user, ticketId);
-            Member.removeSuggestedTicket(message.user, ticketId);
+        user.suggestedTickets.forEach(function (itemId) {
+            Member.addFinishedTicket(message.user, itemId);
+            Member.removeSuggestedTicket(message.user, itemId);
         });
     }).catch((err) => {
         logger.debug("FINISH SUGGESTED FAIL [ERROR]", err);
