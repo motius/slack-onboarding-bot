@@ -251,10 +251,15 @@ function witProcessMessage(bot, message) {
  * @param {Bot} bot - instance of the bot.
  */
 function addTicket(message, bot) {
-    // Check if there is actually a ticket to add
-    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_TICKET) == -1 ||
-        Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_PRIORITY) == -1) {
-        bot.reply(message, CONSTANTS.RESPONSES.TICKET_EMPTY);
+    // Check if there is actually a item to add
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM) == -1) {
+        bot.reply(message, CONSTANTS.RESPONSES.ITEM_EMPTY);
+    }
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM_PRIORITY) == -1) {
+        bot.reply(message, CONSTANTS.RESPONSES.ITEM_PRIORITY_EMPTY);
+    }
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER_TYPE) == -1) {
+        bot.reply(message, CONSTANTS.RESPONSES.ITEM_TYPE_EMPTY);
         return;
     }
     
