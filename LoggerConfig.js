@@ -20,6 +20,24 @@ winston.loggers.add('bot', {
     }
 );
 
+winston.loggers.add('item', {
+        console: {
+            level: loglevel,
+            colorize: true,
+            label: 'item'
+        }
+    }
+);
+
+winston.loggers.add('member', {
+        console: {
+            level: loglevel,
+            colorize: true,
+            label: 'member'
+        }
+    }
+);
+
 winston.loggers.add('socket', {
         console: {
             level: loglevel,
@@ -43,15 +61,6 @@ winston.loggers.add('server', {
             level: loglevel,
             colorize: true,
             label: 'server'
-        }
-    }
-);
-
-winston.loggers.add('member', {
-        console: {
-            level: loglevel,
-            colorize: true,
-            label: 'member'
         }
     }
 );
