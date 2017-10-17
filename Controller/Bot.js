@@ -155,6 +155,7 @@ function ticketsDelivery(bot, message, userId, channelId) {
                                             counter = 0;
                                             Member.addFinishedTicket(userId, t.value);
                                             Member.removeSuggestedTicket(userId, t.value);
+                                            convo.say(CONSTANTS.RESPONSES.CONGRATS[Math.floor(Math.random() * 3)]);
                                             if (items.length < 0) {
                                                 convo.next();
                                             } else {
@@ -211,6 +212,9 @@ function witProcessMessage(bot, message) {
                     case CONSTANTS.INTENTS.ITEM_INTENT.progress:
                         showTicketProgress(message, bot);
                         break;
+                    case CONSTANTS.INTENTS.ITEM_INTENT.remove:
+                        deleteTicket(message, bot);
+                        break;
                     case "tickets_finish_suggested":
                         finishSuggestedTickets(message, bot);
                         break;
@@ -262,7 +266,7 @@ function addTicket(message, bot) {
         bot.reply(message, CONSTANTS.RESPONSES.ITEM_TYPE_EMPTY);
         return;
     }
-    
+
     logger.debug("ADD ITEM", message.entities[CONSTANTS.INTENTS.WIT_ITEM][0].value);
 
     let item = message.entities[CONSTANTS.INTENTS.WIT_ITEM][0].value.replace(/['"]+/g, '');
@@ -326,6 +330,29 @@ function listTickets(message, bot) {
     });
 }
 
+/**
+ * Remove a ticket
+ *
+ * @param message - the message received from the bot controller.
+ * @param {Bot} bot - instance of the bot.
+ */
+function deleteTicket(message, bot) {
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM_ID) == -1) {
+        bot.reply(message, CONSTANTS.RESPONSES.ITEM_ID_EMPTY);
+        return;
+    }
+
+    let itemID = message.entities[CONSTANTS.INTENTS.WIT_ITEM_ID][0].value;
+
+    logger.debug("FINISH ITEM", itemID);
+
+    Ticket.removeTicket(itemID).then((item) => {
+        bot.reply(message, CONSTANTS.RESPONSES.REMOVE_ITEM_SUCCESS);
+    }).catch((err) => {
+        bot.reply(message, CONSTANTS.RESPONSES.REMOVE_ITEM_FAIL);
+        logger.debug("[ERROR] delete ",err);
+    });
+}
 /**
  * Mark one or more items and done
  *
