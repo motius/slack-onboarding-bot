@@ -26,6 +26,7 @@ class TicketClass {
         let mongoSchema = mongoose.Schema({
             ticketId: Number,
             ticketData: String,
+            ticketType: String,
             ticketPriority: Number
         });
         mongoSchema.index({ticketId: 1}, {unique: true});
@@ -40,26 +41,28 @@ class TicketClass {
      * Add the given ticket.
      *
      * @param {String} ticket - new ticket data.
+     * @param {String} type - new ticket type.
      * @param {Number} priority - ticket priority.
      * @return {Promise}
      */
-    static addTicket(ticket, priority) {
+    static addTicket(ticket, type, priority) {
         let ticketId = Math.round(Math.random() * (CONSTANTS.NUMBERS.maxTicketID - CONSTANTS.NUMBERS.minTicketID) + CONSTANTS.NUMBERS.minTicketID);
-        return TicketItem.create({ticketId: ticketId, ticketData: ticket, ticketPriority: priority});
+        return TicketItem.create({ticketId: ticketId, ticketData: ticket, ticketType: type, ticketPriority: priority});
     }
 
     /**
      * Updates the given ticket.
      *
      * @param {Number} ticketId - id of the ticket to be updated.
-     * @param {String} updateTicket - new ticket data.
+     * @param {String} updateTicket -  ticket data.
+     * @param {String} type -  ticket type.
      * @param {Number} updatePriority - ticket priority.
      * @return {Promise}
      */
-    static updateTicketById(ticketId, updateTicket, updatePriority) {
+    static updateTicketById(ticketId, updateTicket, type, updatePriority) {
         return TicketItem.findOneAndUpdate({
             ticketId: ticketId,
-        }, {$set: {ticketData: updateTicket, ticketPriority: updatePriority}});
+        }, {$set: {ticketData: updateTicket, ticketType: type, ticketPriority: updatePriority}});
     }
 
     /**
