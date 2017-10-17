@@ -494,6 +494,122 @@ module.exports.userBot = (controller, client) => {
         SocketServer.sendCommand(event);
     });
 
+    controller.hears(['add_item'], ['direct_message'], function (bot, message) {
+        Utils.checkUser(bot, message.user).then(permission => {
+            // Check for correct Syntax
+            logger.debug("LONG ITEM", message);
+            let item = "", type = "", priority;
+
+            if (message.text.indexOf("add_item") != -1) {
+                item = message.text.substr(message.text.indexOf("add_item") + 8);
+            }
+            else {
+                bot.reply(message, CONSTANTS.RESPONSES.ITEM_WRONG_SYNTAX);
+                return;
+            }
+
+            // item should not be empty!
+            if (item === "") {
+                bot.reply(message, CONSTANTS.RESPONSES.ITEM_EMPTY);
+            }
+            else {
+                item = item.replace(/['"]+/g, '');
+                let priority = function () {
+                    bot.startConversation(message, function (err, convo) {
+                        logger.debug("ITEM PRIORITY", message);
+                        convo.ask(CONSTANTS.RESPONSES.ITEM_PRIORITIES, [
+                            {
+                                pattern: '1',
+                                callback: function (response, convo) {
+                                    Ticket.addTicket(item, type, response.text);
+                                    convo.say(CONSTANTS.RESPONSES.ADD_ITEM_SUCCESS);
+                                    convo.next();
+                                }
+                            },
+                            {
+                                pattern: '2',
+                                callback: function (response, convo) {
+                                    Ticket.addTicket(item, type, response.text);
+                                    convo.say(CONSTANTS.RESPONSES.ADD_ITEM_SUCCESS);
+                                    convo.next();
+
+                                }
+                            },
+                            {
+                                pattern: '3',
+                                callback: function (response, convo) {
+                                    Ticket.addTicket(item, type, response.text);
+                                    convo.say(CONSTANTS.RESPONSES.ADD_ITEM_SUCCESS);
+                                    convo.next();
+                                }
+                            },
+                            {
+                                pattern: '4',
+                                callback: function (response, convo) {
+                                    Ticket.addTicket(item, type, response.text);
+                                    convo.say(CONSTANTS.RESPONSES.ADD_ITEM_SUCCESS);
+                                    convo.next();
+                                }
+                            },
+                            {
+                                pattern: 'cancel',
+                                callback: function (response, convo) {
+                                    convo.say(CONSTANTS.RESPONSES.CANCEL);
+                                    convo.next();
+                                }
+                            },
+                            {
+                                default: true,
+                                callback: function (response, convo) {
+                                    // just repeat the question
+                                    convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
+                                    convo.repeat();
+                                    convo.next();
+                                }
+                            }
+                        ], {}, 'default');
+                    });
+                };
+                bot.startConversation(message, function (err, convo) {
+                    logger.debug("ITEM TYPE", message);
+                    convo.ask(CONSTANTS.RESPONSES.ITEM_TYPE, [
+                        {
+                            pattern: 'core',
+                            callback: function (response, convo) {
+                                type = response.text;
+                                convo.next();
+                                priority();
+                            }
+                        },
+                        {
+                            pattern: 'project',
+                            callback: function (response, convo) {
+                                type = response.text;
+                                convo.next();
+                                priority();
+                            }
+                        },
+                        {
+                            pattern: 'cancel',
+                            callback: function (response, convo) {
+                                convo.say(CONSTANTS.RESPONSES.CANCEL);
+                                convo.next();
+                            }
+                        },
+                        {
+                            default: true,
+                            callback: function (response, convo) {
+                                // just repeat the question
+                                convo.say(CONSTANTS.RESPONSES.NOT_AN_OPTION);
+                                convo.repeat();
+                                convo.next();
+                            }
+                        }], {}, 'default')
+                });
+            }
+        });
+    });
+
     controller.hears(['edit_member'], ['direct_message'], function (bot, message) {
         Utils.checkUser(bot, message.user).then((permission) => {
             let members = message.text.match(CONSTANTS.REGEXES.userIdRegex);
