@@ -12,8 +12,6 @@ const Item = require("./Item");
 const User = require("./User");
 
 
-
-
 let wit = null;
 
 function setWit(init) {
@@ -72,7 +70,9 @@ function witProcessMessage(bot, message) {
                 });
 
             } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.RUDE) !== -1) {  //check if the user was rude
-                bot.reply(message, CONSTANTS.RESPONSES.CONFUSED);
+                bot.reply(message, message.text);
+            } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {  //check if the user was rude
+                bot.reply(message, CONSTANTS.RESPONSES.HELP);
             } else { //default response
                 bot.reply(message, CONSTANTS.RESPONSES.CONFUSED);
             }
