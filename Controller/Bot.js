@@ -28,29 +28,34 @@ function witProcessMessage(bot, message) {
             Response.addReply(message.text);
 
             if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.ITEM_INTENT.default) !== -1) { //check if there is a item intent
-                logger.debug("ITEM INTENT:", message.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value);
-                switch (message.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value) {
-                    case CONSTANTS.INTENTS.ITEM_INTENT.set:
-                        Item.addTicket(message, bot);
-                        break;
-                    case CONSTANTS.INTENTS.ITEM_INTENT.list:
-                        Item.listTickets(message, bot);
-                        break;
-                    case CONSTANTS.INTENTS.ITEM_INTENT.finish:
-                        Item.finishTicket(message, bot);
-                        break;
-                    case CONSTANTS.INTENTS.ITEM_INTENT.progress:
-                        Item.showTicketProgress(message, bot);
-                        break;
-                    case CONSTANTS.INTENTS.ITEM_INTENT.remove:
-                        Item.deleteTicket(message, bot);
-                        break;
-                    case "tickets_finish_suggested":
-                        finishSuggestedTickets(message, bot);
-                        break;
-                    default:
-                        break;
-                }
+                Utils.checkUser(bot, message.user).then((permission) => {
+                    logger.debug("MEMBER INTENT:", message.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value);
+                    switch (message.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value) {
+                        case CONSTANTS.INTENTS.ITEM_INTENT.set:
+                            Item.addTicket(message, bot);
+                            break;
+                        case CONSTANTS.INTENTS.ITEM_INTENT.list:
+                            Item.listTickets(message, bot);
+                            break;
+                        case CONSTANTS.INTENTS.ITEM_INTENT.finish:
+                            Item.finishTicket(message, bot);
+                            break;
+                        case CONSTANTS.INTENTS.ITEM_INTENT.progress:
+                            Item.showTicketProgress(message, bot);
+                            break;
+                        case CONSTANTS.INTENTS.ITEM_INTENT.remove:
+                            Item.deleteTicket(message, bot);
+                            break;
+                        case "tickets_finish_suggested":
+                            finishSuggestedTickets(message, bot);
+                            break;
+                        default:
+                            break;
+                    }
+                }).catch((err) => {
+                    logger.debug("MEMBER INTENT:[ERROR]", err);
+                    bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+                })
             } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.MEMBER_INTENT.default) !== -1) { //check if there is a member intent
                 Utils.checkUser(bot, message.user).then((permission) => {
                     logger.debug("MEMBER INTENT:", message.entities[CONSTANTS.INTENTS.MEMBER_INTENT.default][0].value);
@@ -65,7 +70,7 @@ function witProcessMessage(bot, message) {
                             break;
                     }
                 }).catch((err) => {
-                    logger.debug("[ERROR]", err);
+                    logger.debug("MEMBER INTENT:[ERROR]", err);
                     bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
                 });
 
