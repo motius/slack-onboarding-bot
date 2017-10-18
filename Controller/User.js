@@ -33,6 +33,11 @@ function prepareMember(message, bot) {
             bot.reply(message, CONSTANTS.RESPONSES.PREPARE_SUCCESS);
         }).catch((err) => {
             logger.debug("PREPARE FAIL [ERROR]", err);
+            if (err.name === 'MongoError' && err.code === 11000) {
+                // Duplicate username
+                bot.reply(message, CONSTANTS.RESPONSES.PREPARE_DUPLICATE)
+                return  ;
+            }
             bot.reply(message, CONSTANTS.RESPONSES.PREPARE_FAIL);
         });
     });
