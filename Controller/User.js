@@ -197,15 +197,29 @@ function ticketsDelivery(bot, message, userId, channelId) {
                                             items = items.filter(function (item) {
                                                 return item.ticketId != t.value;
                                             });
-
+                                            Ticket.getTicket(t.value).then((res) => {
+                                                if (!res) {
+                                                    bot.reply(message, CONSTANTS.RESPONSES.NOT_FOUND);
+                                                } else {
+                                                    bot.reply(message, CONSTANTS.RESPONSES.CONGRATS[Math.floor(Math.random() * 3)]);
+                                                }
+                                            }).catch((err) => {
+                                                logger.debug("ERROR ", err);
+                                            });
                                             updateTickets(length - items.length);
                                             counter = 0;
                                             Member.addFinishedTicket(userId, t.value);
                                             Member.removeSuggestedTicket(userId, t.value);
-                                            bot.reply(message, CONSTANTS.RESPONSES.CONGRATS[Math.floor(Math.random() * 3)]);
                                             if (items.length == 0) {
-                                                convo.say(CONSTANTS.RESPONSES.CONGRATULATION);
-                                                convo.next();
+                                                Utils.getGiphy().then((res) => {
+                                                    logger.debug("GIF", res);
+                                                    convo.say(CONSTANTS.RESPONSES.CONGRATULATION + res);
+                                                    convo.next();
+                                                }).catch((err) => {
+                                                    logger.debug("AXIOS [ERROR] ", err);
+                                                    convo.say(CONSTANTS.RESPONSES.CONGRATULATION);
+                                                    convo.next();
+                                                });
                                             } else {
                                                 task.start();
                                             }
