@@ -28,9 +28,9 @@ class Project extends Member {
     static getMemberProgress(userId) {
         super.getMemberProgress(userId)
             .then((res) => {
-                logger.debug("Project", res)
+                logger.debug("Project DB", res)
             }).catch((err) => {
-            logger.debug("Project", err)
+            logger.debug("Project DB", err)
         });
     }
 
@@ -56,9 +56,9 @@ class Project extends Member {
     static addMemberForOnboarding(id, name, username, emailAddress) {
         super.addMember(id, name, username, emailAddress, CONSTANTS.USERS.PROJECT)
             .then((res) => {
-                logger.debug("Project", res)
+                logger.debug("Project DB", res)
             }).catch((err) => {
-            logger.debug("Project", err)
+            logger.debug("Project DB", err)
         });
     }
 
@@ -73,9 +73,9 @@ class Project extends Member {
      */
     static editMember(userId, emailAddress, type) {
         super.editMember(userId, emailAddress, type).then((res) => {
-            logger.debug("Project", res)
+            logger.debug("Project DB", res)
         }).catch((err) => {
-            logger.debug("Project", err)
+            logger.debug("Project DB", err)
         });
     }
 

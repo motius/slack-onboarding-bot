@@ -24,7 +24,7 @@ function witProcessMessage(bot, message) {
         if (err) {
             logger.debug("ERROR", err);
         } else {
-            logger.debug("RESPONSE:", Object.keys(message.entities));
+            logger.debug("RESPONSE [BOT]:", Object.keys(message.entities));
             Response.addReply(message.text);
 
             if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.ITEM_INTENT.default) !== -1) { //check if there is a item intent
@@ -71,7 +71,7 @@ function witProcessMessage(bot, message) {
 
             } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.RUDE) !== -1) {  //check if the user was rude
                 bot.reply(message, message.text);
-            } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {  //check if the user was rude
+            } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {  //check if the user needs help
                 bot.reply(message, CONSTANTS.RESPONSES.HELP);
             } else { //default response
                 bot.reply(message, CONSTANTS.RESPONSES.CONFUSED);

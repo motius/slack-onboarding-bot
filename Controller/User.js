@@ -3,6 +3,7 @@ const Ticket = require('../Models/TicketClass');
 const Member = require('../Models/Users/Member');
 const CONSTANTS = require('../Utility/Constants');
 const cron = require('node-cron');
+const Utils = require("../Utility/Utils");
 
 const jobTime = "*/30 * * * * *";
 const iterations = 4;
@@ -36,7 +37,7 @@ function prepareMember(message, bot) {
             if (err.name === 'MongoError' && err.code === 11000) {
                 // Duplicate username
                 bot.reply(message, CONSTANTS.RESPONSES.PREPARE_DUPLICATE)
-                return  ;
+                return;
             }
             bot.reply(message, CONSTANTS.RESPONSES.PREPARE_FAIL);
         });
@@ -110,17 +111,15 @@ function startOnBoarding(bot, message, user) {
                                 if (err) {
                                     logger.debug("ERROR", err);
                                 } else {
-                                    logger.debug("RESPONSE:", Object.keys(response.entities));
+                                    logger.debug("RESPONSE [USER]:", Object.keys(response.entities));
                                     if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.CONFIRMATION) !== -1) {
                                         ticketsDelivery(bot, message, user.userId, res.channel.id);
                                         task.destroy();
                                         convo.next();
                                     } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
-                                        logger.debug("Utils ", "help");
+                                        logger.debug("User", "help");
                                         bot.reply(message, CONSTANTS.RESPONSES.HELP);
-                                        // convo.say(CONSTANTS.RESPONSES.HELP);
                                         task.start();
-                                        // task.destroy();
                                     } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.STOP) !== -1) {
                                         convo.say(CONSTANTS.RESPONSES.STOP);
                                         task.start();
@@ -143,7 +142,7 @@ function ticketsDelivery(bot, message, userId, channelId) {
             length = 0;
             items = items.concat(totalitems.slice(0, index));
             totalitems = totalitems.slice(index);
-            logger.debug(totalitems);
+            logger.debug("TOTAL ITEM", totalitems);
             string = {
                 'text': 'Hey, here are a few things you need to know. ',
                 'attachments': [],
@@ -188,7 +187,7 @@ function ticketsDelivery(bot, message, userId, channelId) {
                             if (err) {
                                 logger.info(err);
                             } else {
-                                logger.debug("RESPONSE:", Object.keys(response.entities));
+                                logger.debug("RESPONSE [USER]:", Object.keys(response.entities));
                                 if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.ITEM_INTENT.default) !== -1) {
 
                                     if (response.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value === CONSTANTS.INTENTS.ITEM_INTENT.finish) {

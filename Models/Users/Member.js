@@ -126,24 +126,22 @@ class Member {
 
     static addFinishedTicket(userId, ticketId) {
         return member.findOneAndUpdate({userId: userId}, {$addToSet: {tickets: ticketId}}, function (err, model) {
-            logger.debug("Member ", err);
-            if (err) throw "ERROR FINISHING TICKET!";
+            logger.debug("Member DB", err);
+            if (err) throw new Error("ERROR FINISHING TICKET!");
 
         });
     }
 
     static addSuggestedTicket(userId, ticketIds) {
         return member.findOneAndUpdate({userId: userId}, {$addToSet: {suggestedTickets: {$each: ticketIds}}}, function (err, model) {
-            if (err) throw "ERROR ADDING SUGGESTED TICKET!";
+            if (err) throw new Error("ERROR ADDING SUGGESTED TICKET!");
         });
     }
 
     static removeSuggestedTicket(userId, ticketId) {
-        let self = this;
         return member.findOneAndUpdate({userId: userId}, {$pull: {suggestedTickets: ticketId}}, function (err, model) {
-            logger.debug("Member ", err)
-            if (err) throw "ERROR REMOVING SUGGESTED TICKET!";
-            // self.addFinishedTicket(userId, ticketId);
+            logger.debug("Member DB ", err);
+            if (err) throw (new Error("ERROR REMOVING SUGGESTED TICKET!"));
         });
     }
 }

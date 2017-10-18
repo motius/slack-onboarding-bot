@@ -107,8 +107,8 @@ function finishTicket(message, bot) {
             let fullfilleditems = res.tickets;
             let alreadyChecked = false;
 
-            for (i = 0; i < fulfilleditems.length; i++) {
-                if (fulfilleditems[i].ticketId == ids[1]) {
+            for (i = 0; i < fullfilleditems.length; i++) {
+                if (fullfilleditems[i].ticketId == ids[1]) {
                     alreadyChecked = true;
                     break;
                 }

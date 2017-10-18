@@ -27,9 +27,9 @@ class Core extends Member {
     static getMemberProgress(userId) {
         super.getMemberProgress(userId)
             .then((res) => {
-                logger.debug("Core ", res)
+                logger.debug("Core DB", res)
             }).catch((err) => {
-            logger.debug("Core ", err)
+            logger.debug("Core DB", err)
         });
     }
 
@@ -55,9 +55,9 @@ class Core extends Member {
     static addMemberForOnboarding(id, name, username, emailAddress) {
         super.addMember(id, name, username, emailAddress, CONSTANTS.USERS.CORE)
             .then((res) => {
-                logger.debug("Core ", res)
+                logger.debug("Core DB", res)
             }).catch((err) => {
-            logger.debug("Core ", err)
+            logger.debug("Core DB", err)
         });
     }
 
@@ -71,9 +71,9 @@ class Core extends Member {
      */
     static editMember(userId, emailAddress, type) {
         super.editMember(userId, emailAddress, type).then((res) => {
-            logger.debug("Core ", res)
+            logger.debug("Core DB", res)
         }).catch((err) => {
-            logger.debug("Core ", err)
+            logger.debug("Core DB", err)
         });
     }
 }
