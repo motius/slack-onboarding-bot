@@ -26,7 +26,7 @@ class TicketClass {
         let mongoSchema = mongoose.Schema({
             ticketId: Number,
             ticketData: String,
-            ticketType: String,
+            ticketType: [String],
             ticketPriority: Number
         });
         mongoSchema.index({ticketId: 1}, {unique: true});
@@ -41,7 +41,7 @@ class TicketClass {
      * Add the given ticket.
      *
      * @param {String} ticket - new ticket data.
-     * @param {String} type - new ticket type.
+     * @param {Array} type - new ticket type.
      * @param {Number} priority - ticket priority.
      * @return {Promise}
      */
@@ -55,7 +55,7 @@ class TicketClass {
      *
      * @param {Number} ticketId - id of the ticket to be updated.
      * @param {String} updateTicket -  ticket data.
-     * @param {String} type -  ticket type.
+     * @param {Array} type -  ticket type.
      * @param {Number} updatePriority - ticket priority.
      * @return {Promise}
      */
@@ -78,9 +78,19 @@ class TicketClass {
     /**
      * Get all given ticket.
      *
+     * @param {String} type -  ticket type.
      * @return {Promise}
      */
-    static getTickets() {
+    static getTicketsWithType(type) {
+        return TicketItem.find({});
+    }
+
+    /**
+     * Get all given ticket.
+     *
+     * @return {Promise}
+     */
+    static getAllTickets() {
         return TicketItem.find({});
     }
 

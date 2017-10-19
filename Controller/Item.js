@@ -45,7 +45,7 @@ function addTicket(message, bot) {
  */
 function listTickets(message, bot) {
     logger.debug("LIST ITEMS");
-    Ticket.getTickets().then((res) => {
+    Ticket.getAllTickets().then((res) => {
         let items = {
             'text': CONSTANTS.RESPONSES.ITEM_LIST,
             'attachments': []
@@ -149,7 +149,7 @@ function showTicketProgress(message, bot) {
 
     logger.debug("SHOW ITEM PROGRESS");
     Member.getMemberProgress(message.entities[CONSTANTS.INTENTS.WIT_MEMBER][0].value).then((res) => {
-        Ticket.getTickets().then((totalitems) => {
+        Ticket.getTicketsWithType(res.type).then((totalitems) => {
             let progress = 0;
             let fulfilleditems = res.tickets;
 
@@ -286,8 +286,8 @@ function addLongTicket(message, bot, item) {
  */
 function memberViewTickets(message, bot) {
     logger.debug("LIST ITEMS", message);
-    Ticket.getTickets().then((tickets) => {
-        Member.getMember(message.user).then((user) => {
+    Member.getMember(message.user).then((user) => {
+        Ticket.getTicketsWithType(user.type).then((tickets) => {
             logger.debug("USER", message);
             if (user) {
                 let items = {
