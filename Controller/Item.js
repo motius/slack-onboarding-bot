@@ -151,7 +151,6 @@ function showTicketProgress(message, bot) {
     logger.debug("SHOW ITEM PROGRESS", user[1]);
     Member.getMemberProgress(user[1]).then((res) => {
         logger.debug("MEMBER PROGRESS", res);
-        console.log("MEMBER PROGRESS", res);
         Ticket.getTicketsWithType(res.type).then((totalitems) => {
             let progress = 0;
             let fulfilleditems = res.tickets;
