@@ -53,8 +53,12 @@ function witProcessMessage(bot, message) {
                             break;
                     }
                 }).catch((err) => {
-                    logger.debug("MEMBER INTENT:[ERROR]", err);
-                    bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+                    if (response.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value === CONSTANTS.INTENTS.ITEM_INTENT.list) {
+                        Item.memberViewTickets(message, bot);
+                    } else {
+                        logger.debug("MEMBER INTENT:[ERROR]", err);
+                        bot.reply(message, CONSTANTS.RESPONSES.NOT_AUTHORIZED);
+                    }
                 })
             } else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.MEMBER_INTENT.default) !== -1) { //check if there is a member intent
                 Utils.checkUser(bot, message.user).then((permission) => {

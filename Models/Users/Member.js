@@ -74,7 +74,7 @@ class Member {
      * @return {Promise}
      */
     static getMemberProgress(userId) {
-        return (member.findOne({userId: userId}, 'tickets'));
+        return (member.findOne({userId: userId}, 'tickets type'));
     }
 
     /**
