@@ -22,11 +22,14 @@ function addTicket(message, bot) {
         bot.reply(message, CONSTANTS.RESPONSES.ITEM_TYPE_EMPTY);
         return;
     }
-
+    let ticketTypes = [];
+    message.entities[CONSTANTS.INTENTS.WIT_MEMBER_TYPE].forEach((type) => {
+        ticketTypes.push(type.value);
+    });
     logger.debug("ADD ITEM", message.entities[CONSTANTS.INTENTS.WIT_ITEM][0].value);
 
     let item = message.entities[CONSTANTS.INTENTS.WIT_ITEM][0].value.replace(/['"]+/g, '');
-    Ticket.addTicket(item, message.entities[CONSTANTS.INTENTS.WIT_MEMBER_TYPE][0].value, message.entities[CONSTANTS.INTENTS.WIT_ITEM_PRIORITY][0].value).then((res) => {
+    Ticket.addTicket(item, ticketTypes, message.entities[CONSTANTS.INTENTS.WIT_ITEM_PRIORITY][0].value).then((res) => {
         bot.reply(message, CONSTANTS.RESPONSES.ADD_ITEM_SUCCESS);
     }).catch((err) => {
         logger.debug("ADD ITEM FAIL [ERROR]", err);
@@ -56,7 +59,7 @@ function listTickets(message, bot) {
         });
         bot.reply(message, items);
     }).catch((err) => {
-        logger.debug(err);
+        logger.debug("LIST TICKETS [ERROR]", err);
     });
 }
 
@@ -127,7 +130,7 @@ function finishTicket(message, bot) {
             bot.reply(message, CONSTANTS.RESPONSES.FINISH_ITEM_NOT_FOUND);
         });
     }).catch((err) => {
-        logger.debug(err);
+        logger.debug("GET TICKETS [ERROR]", err);
     });
 }
 
@@ -154,7 +157,7 @@ function showTicketProgress(message, bot) {
 
             bot.reply(message, CONSTANTS.RESPONSES.PROGRESS_REPLY + progress + "%");
         }).catch((err) => {
-            logger.debug(err);
+            logger.debug("TICKETS [ERROR]", err);
         })
     }).catch((err) => {
         logger.debug("ITEM PROGRESS FAIL [ERROR]", err);
@@ -171,7 +174,7 @@ function showTicketProgress(message, bot) {
  */
 function addLongTicket(message, bot, item) {
     // Check if there is actually a item to add
-
+    let type, priority;
     let priority = function () {
         bot.startConversation(message, function (err, convo) {
             logger.debug("ITEM PRIORITY", message);
@@ -234,7 +237,7 @@ function addLongTicket(message, bot, item) {
             {
                 pattern: 'core',
                 callback: function (response, convo) {
-                    type = response.text;
+                    type = [response.text];
                     convo.next();
                     priority();
                 }
@@ -242,7 +245,15 @@ function addLongTicket(message, bot, item) {
             {
                 pattern: 'project',
                 callback: function (response, convo) {
-                    type = response.text;
+                    type = [response.text];
+                    convo.next();
+                    priority();
+                }
+            },
+            {
+                pattern: 'both',
+                callback: function (response, convo) {
+                    type = ["core", "project"];
                     convo.next();
                     priority();
                 }
@@ -266,9 +277,52 @@ function addLongTicket(message, bot, item) {
     });
 }
 
+
+/**
+ * List all the items added to the DB
+ *
+ * @param message - the message received from the bot controller.
+ * @param {Bot} bot - instance of the bot.
+ */
+function memberViewTickets(message, bot) {
+    logger.debug("LIST ITEMS", message);
+    Ticket.getTickets().then((tickets) => {
+        Member.getMember(message.user).then((user) => {
+            logger.debug("USER", message);
+            if (user) {
+                let items = {
+                    'text': CONSTANTS.RESPONSES.ITEM_LIST,
+                    'attachments': []
+                };
+                tickets.forEach((t) => {
+                    let item;
+                    if (user.tickets.indexOf(t.ticketId) != -1) {
+                        item = {
+                            'title': t.ticketData + ' ( ID: ' + t.ticketId + ' )',
+                            'color': '#11f900',
+                        };
+                    } else {
+                        item = {
+                            'title': t.ticketData + ' ( ID: ' + t.ticketId + ' )',
+                            'color': '#117ef9',
+                        };
+                    }
+                    items.attachments.push(item);
+                });
+                bot.reply(message, items);
+            }
+        }).catch((err) => {
+            logger.debug("MEMBER GET [ERR]", err);
+        });
+    }).catch((err) => {
+        logger.debug("MEMBER LIST [ERR]", err);
+    });
+}
+
 module.exports = {
     addTicket: addTicket,
     listTickets: listTickets,
+    memberViewTickets: memberViewTickets,
     finishTicket: finishTicket,
     deleteTicket: deleteTicket,
     showTicketProgress: showTicketProgress,

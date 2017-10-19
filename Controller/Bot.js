@@ -141,7 +141,7 @@ module.exports.userBot = (controller, client) => {
         Utils.checkUser(bot, message.user).then(permission => {
             // Check for correct Syntax
             logger.debug("LONG ITEM", message);
-            let item = "", type = "", priority;
+            let item = "";
 
             if (message.text.indexOf("add_item") != -1) {
                 item = message.text.substr(message.text.indexOf("add_item") + 8);
