@@ -4,6 +4,7 @@ const Member = require('../Models/Users/Member');
 const CONSTANTS = require('../Utility/Constants');
 const cron = require('node-cron');
 const Utils = require("../Utility/Utils");
+const Item = require("./Item");
 
 const jobTime = "*/30 * * * * *";
 const iterations = 4;
@@ -113,7 +114,7 @@ function startOnBoarding(bot, message, user) {
                                 } else {
                                     logger.debug("RESPONSE [USER]:", Object.keys(response.entities));
                                     if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.CONFIRMATION) !== -1) {
-                                        ticketsDelivery(bot, message, user.userId, res.channel.id);
+                                        ticketsDelivery(bot, message, user.userId, res.channel.id, user.type);
                                         task.destroy();
                                         convo.next();
                                     } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
@@ -133,10 +134,10 @@ function startOnBoarding(bot, message, user) {
     });
 }
 
-function ticketsDelivery(bot, message, userId, channelId) {
+function ticketsDelivery(bot, message, userId, channelId, type) {
     let items = [], string, length, task, counter = 0;
 
-    Ticket.getTickets().then((totalitems) => {
+    Ticket.getTicketsWithType(type).then((totalitems) => {
 
         let updateTickets = function (index) {
             length = 0;
@@ -223,6 +224,9 @@ function ticketsDelivery(bot, message, userId, channelId) {
                                                 task.start();
                                             }
                                         });
+                                    } else if (response.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value === CONSTANTS.INTENTS.ITEM_INTENT.list) {
+                                        Item.memberViewTickets(message, bot);
+                                        task.start();
                                     }
                                 } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
                                     logger.debug("Utils ", "help");
