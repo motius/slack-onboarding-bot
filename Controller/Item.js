@@ -174,7 +174,7 @@ function showTicketProgress(message, bot) {
  */
 function addLongTicket(message, bot, item) {
     // Check if there is actually a item to add
-    let type, priority;
+    let type;
     let priority = function () {
         bot.startConversation(message, function (err, convo) {
             logger.debug("ITEM PRIORITY", message);
