@@ -18,14 +18,16 @@ function addTicket(message, bot) {
     if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM_PRIORITY) == -1) {
         bot.reply(message, CONSTANTS.RESPONSES.ITEM_PRIORITY_EMPTY);
     }
-    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER_TYPE) == -1) {
-        bot.reply(message, CONSTANTS.RESPONSES.ITEM_TYPE_EMPTY);
-        return;
-    }
+
+
     let ticketTypes = [];
-    message.entities[CONSTANTS.INTENTS.WIT_MEMBER_TYPE].forEach((type) => {
-        ticketTypes.push(type.value);
-    });
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER_TYPE) == -1) {
+        ticketTypes = ["core", "project"];
+    } else {
+        message.entities[CONSTANTS.INTENTS.WIT_MEMBER_TYPE].forEach((type) => {
+            ticketTypes.push(type.value);
+        });
+    }
     logger.debug("ADD ITEM", message.entities[CONSTANTS.INTENTS.WIT_ITEM][0].value);
 
     let item = message.entities[CONSTANTS.INTENTS.WIT_ITEM][0].value.replace(/['"]+/g, '');
