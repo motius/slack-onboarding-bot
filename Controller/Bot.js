@@ -26,8 +26,10 @@ function witProcessMessage(bot, message) {
         } else {
             logger.debug("RESPONSE [BOT]:", Object.keys(message.entities));
             Response.addReply(message.text);
-
-            if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.ITEM_INTENT.default) !== -1) { //check if there is a item intent
+            if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.GREETINGS) !== -1) {
+                bot.reply(message, CONSTANTS.RESPONSES.WELCOME_TEXT);
+            }
+            else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.ITEM_INTENT.default) !== -1) { //check if there is a item intent
                 Utils.checkUser(bot, message.user).then((permission) => {
                     logger.debug("MEMBER INTENT:", message.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value);
                     switch (message.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value) {
