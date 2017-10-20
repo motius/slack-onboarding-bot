@@ -48,17 +48,22 @@ function addTicket(message, bot) {
 function listTickets(message, bot) {
     logger.debug("LIST ITEMS");
     Ticket.getAllTickets().then((res) => {
-        let items = {
-            'text': CONSTANTS.RESPONSES.ITEM_LIST,
-            'attachments': []
-        };
-        res.forEach((t) => {
-            let item = {
-                'title': t.ticketData + ' with priority ' + t.ticketPriority + ' ( ID: ' + t.ticketId + ' )',
-                'color': '#117ef9',
+        let items;
+        if (res.length > 0) {
+            items = {
+                'text': CONSTANTS.RESPONSES.ITEM_LIST,
+                'attachments': []
             };
-            items.attachments.push(item);
-        });
+            res.forEach((t) => {
+                let item = {
+                    'title': t.ticketData + ' with priority ' + t.ticketPriority + ' ( ID: ' + t.ticketId + ' )',
+                    'color': '#117ef9',
+                };
+                items.attachments.push(item);
+            });
+        } else {
+            items = CONSTANTS.RESPONSES.ITEM_LIST_EMPTY;
+        }
         bot.reply(message, items);
     }).catch((err) => {
         logger.debug("LIST TICKETS [ERROR]", err);
