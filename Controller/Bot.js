@@ -28,6 +28,10 @@ function witProcessMessage(bot, message) {
             Response.addReply(message.text);
             if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.GREETINGS) !== -1) {
                 bot.reply(message, CONSTANTS.RESPONSES.WELCOME_TEXT);
+                Utils.checkUser(bot, message.user).then((permission) => {
+                    bot.reply(message, CONSTANTS.RESPONSES.WELCOME_COMMAND_TEXT);
+                }).catch((err) => {
+                });
             }
             else if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.ITEM_INTENT.default) !== -1) { //check if there is a item intent
                 Utils.checkUser(bot, message.user).then((permission) => {
