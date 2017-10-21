@@ -82,7 +82,6 @@ class TicketClass {
      * @return {Promise}
      */
     static getTicketsWithType(type) {
-        console.log(type.toLocaleLowerCase())
         return TicketItem.find({ticketType: {"$in": [type.toLocaleLowerCase()]}});
     }
 

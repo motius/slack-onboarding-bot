@@ -296,33 +296,42 @@ function addLongTicket(message, bot, item) {
 function memberViewTickets(message, bot) {
     logger.debug("LIST ITEMS", message);
     Member.getMember(message.user).then((user) => {
-        Ticket.getTicketsWithType(user.type).then((tickets) => {
-            logger.debug("USER", message);
-            if (user) {
-                let items = {
-                    'text': CONSTANTS.RESPONSES.ITEM_LIST,
-                    'attachments': []
-                };
-                tickets.forEach((t) => {
-                    let item;
-                    if (user.tickets.indexOf(t.ticketId) != -1) {
-                        item = {
-                            'title': t.ticketData + ' ( ID: ' + t.ticketId + ' )',
-                            'color': '#11f900',
+        if (user) {
+            Ticket.getTicketsWithType(user.type).then((tickets) => {
+                logger.debug("USER", message);
+                if (user) {
+                    let items;
+                    if (tickets.length > 0) {
+                        items = {
+                            'text': CONSTANTS.RESPONSES.ITEM_LIST,
+                            'attachments': []
                         };
+                        tickets.forEach((t) => {
+                            let item;
+                            if (user.tickets.indexOf(t.ticketId) != -1) {
+                                item = {
+                                    'title': t.ticketData + ' ( ID: ' + t.ticketId + ' )',
+                                    'color': '#11f900',
+                                };
+                            } else {
+                                item = {
+                                    'title': t.ticketData + ' ( ID: ' + t.ticketId + ' )',
+                                    'color': '#117ef9',
+                                };
+                            }
+                            items.attachments.push(item);
+                        });
                     } else {
-                        item = {
-                            'title': t.ticketData + ' ( ID: ' + t.ticketId + ' )',
-                            'color': '#117ef9',
-                        };
+                        items = CONSTANTS.RESPONSES.ITEM_LIST_EMPTY;
                     }
-                    items.attachments.push(item);
-                });
-                bot.reply(message, items);
-            }
-        }).catch((err) => {
-            logger.debug("MEMBER GET [ERR]", err);
-        });
+                    bot.reply(message, items);
+                }
+            }).catch((err) => {
+                logger.debug("MEMBER GET [ERR]", err);
+            });
+        } else {
+            bot.reply(message, CONSTANTS.RESPONSES.USER_NOT_FOUND);
+        }
     }).catch((err) => {
         logger.debug("MEMBER LIST [ERR]", err);
     });

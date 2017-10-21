@@ -26,10 +26,22 @@ function witProcessMessage(bot, message) {
         } else {
             logger.debug("RESPONSE [BOT]:", Object.keys(message.entities));
             Response.addReply(message.text);
+
             if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.GREETINGS) !== -1) {
                 bot.reply(message, CONSTANTS.RESPONSES.WELCOME_TEXT);
                 Utils.checkUser(bot, message.user).then((permission) => {
-                    bot.reply(message, CONSTANTS.RESPONSES.WELCOME_COMMAND_TEXT);
+                    let response = {
+                        'text': CONSTANTS.RESPONSES.BOT_COMMANDS,
+                        'attachments': []
+                    };
+                    CONSTANTS.RESPONSES.WELCOME_COMMAND_TEXT.forEach((t) => {
+                        let item = {
+                            'title': t,
+                            'color': '#117ef9',
+                        };
+                        response.attachments.push(item);
+                    });
+                    bot.reply(message, response);
                 }).catch((err) => {
                 });
             }
@@ -59,7 +71,7 @@ function witProcessMessage(bot, message) {
                             break;
                     }
                 }).catch((err) => {
-                    if (response.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value === CONSTANTS.INTENTS.ITEM_INTENT.list) {
+                    if (message.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value === CONSTANTS.INTENTS.ITEM_INTENT.list) {
                         Item.memberViewTickets(message, bot);
                     } else {
                         logger.debug("MEMBER INTENT:[ERROR]", err);
