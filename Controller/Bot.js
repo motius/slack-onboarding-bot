@@ -64,6 +64,8 @@ function witProcessMessage(bot, message) {
                         case CONSTANTS.INTENTS.ITEM_INTENT.remove:
                             Item.deleteTicket(message, bot);
                             break;
+                        case CONSTANTS.INTENTS.ITEM_INTENT.edit:
+                            Item.editTicket(message, bot);
                         case "tickets_finish_suggested":
                             finishSuggestedTickets(message, bot);
                             break;

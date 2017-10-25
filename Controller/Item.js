@@ -39,6 +39,57 @@ function addTicket(message, bot) {
     });
 }
 
+function editTicket(message, bot) {
+    // For correct processing we need an ID and a new item OR a priority OR another item type
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM_ID) == -1)
+    {
+        bot.reply(message, CONSTANTS.RESPONSES.ITEM_ID_EMPTY);
+        return;
+    }
+
+    if (Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM_PRIORITY) == -1 &&
+    Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM) == -1 &&
+    Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM_TYPE) == -1)
+    {
+        bot.reply(message, CONSTANTS.RESPONSES.ITEM_EDIT_NO_EDIT_INFORMATION);
+        return;
+    }
+
+    let ticketId = message.entities[CONSTANTS.INTENTS.WIT_ITEM_ID][0].value;
+
+    // Array of promises
+    let promises = [];
+
+    // If there is information, pick it out of the message and update the entry
+    if(Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM_PRIORITY) != -1)
+    {
+        promises.push(Ticket.editTicketPriority(ticketId, message.entities[CONSTANTS.INTENTS.WIT_ITEM_PRIORITY][0].value));
+    }
+
+    if(Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM_TYPE) != -1)
+    {
+        let ticketTypes = [];
+
+        message.entities[CONSTANTS.INTENTS.WIT_MEMBER_TYPE].forEach((type) => {
+            ticketTypes.push(type.value);
+        });
+
+        promises.push(Ticket.editTicketType(ticketId, ticketTypes));
+    }
+
+    if(Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_ITEM) != 1)
+    {
+        promises.push(Ticket.editTicketText(ticketId,  message.entities[CONSTANTS.INTENTS.WIT_ITEM][0].value.replace(/['"]+/g, '')));
+    }
+
+    Promise.all(promises).then((res) => {
+        bot.reply(message, CONSTANTS.RESPONSES.ITEM_EDIT_SUCCESSFUL);
+    }).catch((err) => {
+        logger.debug("EDIT ITEM FAIL [ERROR]", err);
+        CONSTANTS.RESPONSES.ITEM_EDIT_FAIL;
+    })
+}
+
 /**
  * List all the items added to the DB
  *
@@ -286,7 +337,6 @@ function addLongTicket(message, bot, item) {
     });
 }
 
-
 /**
  * List all the items added to the DB
  *
@@ -345,4 +395,5 @@ module.exports = {
     deleteTicket: deleteTicket,
     showTicketProgress: showTicketProgress,
     addLongTicket: addLongTicket,
+    editTicket: editTicket,
 };

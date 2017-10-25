@@ -50,6 +50,27 @@ class TicketClass {
         return TicketItem.create({ticketId: ticketId, ticketData: ticket, ticketType: type, ticketPriority: priority});
     }
 
+    static editTicketPriority(ticketId, priority)
+    {
+        return TicketItem.findOneAndUpdate({
+            ticketId: ticketId,
+        }, {$set: {ticketPriority: priority}});
+    }
+
+    static editTicketText(ticketId, text)
+    {
+        return TicketItem.findOneAndUpdate({
+            ticketId: ticketId,
+        }, {$set: {ticketData: text}});
+    }
+
+    static editTicketType(ticketId, type)
+    {
+        return TicketItem.findOneAndUpdate({
+            ticketId: ticketId,
+        }, {$set: {ticketType: type}});
+    }
+
     /**
      * Updates the given ticket.
      *
