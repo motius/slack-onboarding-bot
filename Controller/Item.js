@@ -159,12 +159,19 @@ function finishTicket(message, bot) {
         return;
     }
 
+    if(Object.keys(message.entities).indexOf(CONSTANTS.INTENTS.WIT_MEMBER) == -1)
+    {
+        bot.reply(message, CONSTANTS.RESPONSES.NOT_FOUND);
+        return;
+    }
+
     let itemID = message.entities[CONSTANTS.INTENTS.WIT_ITEM_ID][0].value;
+    let user = message.entities[CONSTANTS.INTENTS.WIT_MEMBER][0].value.match(CONSTANTS.REGEXES.userIdRegex);
 
     logger.debug("FINISH ITEM", itemID);
 
     Ticket.getTicket(itemID).then((item) => {
-        Member.getMemberProgress(message.user).then((res) => {
+        Member.getMemberProgress(user).then((res) => {
             let fullfilleditems = res.tickets;
             let alreadyChecked = false;
 
@@ -180,8 +187,8 @@ function finishTicket(message, bot) {
             }
             else {
                 bot.reply(message, CONSTANTS.RESPONSES.FINISH_ITEM_NOT_YET_FINISHED);
-                Member.addFinishedTicket(message.user, itemID);
-                Member.removeSuggestedTicket(message.user, itemID);
+                Member.addFinishedTicket(user, itemID);
+                Member.removeSuggestedTicket(user, itemID);
             }
         }).catch((err) => {
             logger.debug("FINISH ITEM FAIL [ERROR]", err);
