@@ -178,7 +178,7 @@ function ticketsDelivery(bot, message, userId, channelId, type) {
             task.start();
             convo.say(string);
 
-            convo.ask("Tell me when you are done with them", [
+            convo.ask("Tell me when you are done with any of them", [
                 {
                     default: true,
                     callback: function (response, convo) {
@@ -192,38 +192,42 @@ function ticketsDelivery(bot, message, userId, channelId, type) {
                                 if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.ITEM_INTENT.default) !== -1) {
 
                                     if (response.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value === CONSTANTS.INTENTS.ITEM_INTENT.finish) {
-                                        response.entities[CONSTANTS.INTENTS.WIT_ITEM_ID].forEach(function (t) {
+                                        if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.ITEM_INTENT.default) !== -1) {
+                                            response.entities[CONSTANTS.INTENTS.WIT_ITEM_ID].forEach(function (t) {
 
-                                            items = items.filter(function (item) {
-                                                return item.ticketId != t.value;
-                                            });
-                                            Ticket.getTicket(t.value).then((res) => {
-                                                if (!res) {
-                                                    bot.reply(message, CONSTANTS.RESPONSES.NOT_FOUND);
-                                                } else {
-                                                    bot.reply(message, CONSTANTS.RESPONSES.CONGRATS[Math.floor(Math.random() * 3)]);
-                                                }
-                                            }).catch((err) => {
-                                                logger.debug("ERROR ", err);
-                                            });
-                                            updateTickets(length - items.length);
-                                            counter = 0;
-                                            Member.addFinishedTicket(userId, t.value);
-                                            Member.removeSuggestedTicket(userId, t.value);
-                                            if (items.length == 0) {
-                                                Utils.getGiphy().then((res) => {
-                                                    logger.debug("GIF", res);
-                                                    convo.say(CONSTANTS.RESPONSES.CONGRATULATION + res);
-                                                    convo.next();
-                                                }).catch((err) => {
-                                                    logger.debug("AXIOS [ERROR] ", err);
-                                                    convo.say(CONSTANTS.RESPONSES.CONGRATULATION);
-                                                    convo.next();
+                                                items = items.filter(function (item) {
+                                                    return item.ticketId != t.value;
                                                 });
-                                            } else {
-                                                task.start();
-                                            }
-                                        });
+                                                Ticket.getTicket(t.value).then((res) => {
+                                                    if (!res) {
+                                                        bot.reply(message, CONSTANTS.RESPONSES.NOT_FOUND);
+                                                    } else {
+                                                        bot.reply(message, CONSTANTS.RESPONSES.CONGRATS[Math.floor(Math.random() * 3)]);
+                                                    }
+                                                }).catch((err) => {
+                                                    logger.debug("ERROR ", err);
+                                                });
+                                                updateTickets(length - items.length);
+                                                counter = 0;
+                                                Member.addFinishedTicket(userId, t.value);
+                                                Member.removeSuggestedTicket(userId, t.value);
+                                                if (items.length == 0) {
+                                                    Utils.getGiphy().then((res) => {
+                                                        logger.debug("GIF", res);
+                                                        convo.say(CONSTANTS.RESPONSES.CONGRATULATION + res);
+                                                        convo.next();
+                                                    }).catch((err) => {
+                                                        logger.debug("AXIOS [ERROR] ", err);
+                                                        convo.say(CONSTANTS.RESPONSES.CONGRATULATION);
+                                                        convo.next();
+                                                    });
+                                                } else {
+                                                    task.start();
+                                                }
+                                            });
+                                        } else {
+                                            convo.say(CONSTANTS.RESPONSES.ITEM_ID_EMPTY);
+                                        }
                                     } else if (response.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value === CONSTANTS.INTENTS.ITEM_INTENT.list) {
                                         Item.memberViewTickets(response, bot);
                                         task.start();
