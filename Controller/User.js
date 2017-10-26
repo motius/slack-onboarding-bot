@@ -225,7 +225,7 @@ function ticketsDelivery(bot, message, userId, channelId, type) {
                                             }
                                         });
                                     } else if (response.entities[CONSTANTS.INTENTS.ITEM_INTENT.default][0].value === CONSTANTS.INTENTS.ITEM_INTENT.list) {
-                                        Item.memberViewTickets(message, bot);
+                                        Item.memberViewTickets(response, bot);
                                         task.start();
                                     }
                                 } else if (Object.keys(response.entities).indexOf(CONSTANTS.INTENTS.HELP) !== -1) {
