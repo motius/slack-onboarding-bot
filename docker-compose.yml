@@ -11,6 +11,8 @@ services:
   bot:
     environment:
       MONGODB_URI: mongodb://db:27017
+      SLACK_TOKEN: ${SLACK_TOKEN}
+      WIT_TOKEN: ${WIT_TOKEN}
     build: .
     links:
       - db:mongo
