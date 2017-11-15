@@ -1,3 +1,5 @@
+image: ilyasemenov/gitlab-ci-git-push
+
 stages:
   - prepare
   - integrate
@@ -45,6 +47,14 @@ deploy:general:
         - master
     tags:
         - staging
+
+deploy:push-github:
+    stage: deploy
+    only:
+        - master
+    script: git-push git@github.com:motius/slack-onboarding-bot.git
+    tags:
+        - staging-docker
 
 # ---------------------------------------------------------------------------------------------- #
 # ----------------------------------------- LOGS --------------------------------------------- #
